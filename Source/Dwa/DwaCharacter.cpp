@@ -27,7 +27,7 @@ ADwaCharacter::ADwaCharacter()
 	// set our turn rates for input
 	BaseTurnRate = 45.f;
 	BaseLookUpRate = 45.f;
-
+	Choosen = false;
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
@@ -63,6 +63,10 @@ void ADwaCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInput
 	check(PlayerInputComponent);
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+	PlayerInputComponent->BindAction("ObjUp", IE_Released, this, &ADwaCharacter::ObjUp);
+	PlayerInputComponent->BindAction("ObjDown", IE_Released, this, &ADwaCharacter::ObjDown);
+	PlayerInputComponent->BindAction("ObjRight", IE_Released, this, &ADwaCharacter::ObjRight);
+	PlayerInputComponent->BindAction("ObjLeft", IE_Released, this, &ADwaCharacter::ObjLeft);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &ADwaCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ADwaCharacter::MoveRight);
@@ -74,6 +78,7 @@ void ADwaCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInput
 	PlayerInputComponent->BindAxis("TurnRate", this, &ADwaCharacter::TurnAtRate);
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
 	PlayerInputComponent->BindAxis("LookUpRate", this, &ADwaCharacter::LookUpAtRate);
+	PlayerInputComponent->BindAxis("MoveUp", this, &ADwaCharacter::MoveUp);
 
 	// handle touch devices
 	PlayerInputComponent->BindTouch(IE_Pressed, this, &ADwaCharacter::TouchStarted);
@@ -98,11 +103,36 @@ void ADwaCharacter::Hit()
 	if (GetWorld()->LineTraceSingleByChannel(*HitResult, StartTrace, EndTrace, ECC_Visibility, *TraceParams))
 	{
 		DrawDebugLine(GetWorld(), StartTrace, EndTrace, FColor::Green, false, 5.f);
-		ATank* TestTarget = Cast<ATank>(HitResult->Actor.Get());
-		if (TestTarget != NULL && !TestTarget->IsPendingKill())
+		if (TestTarget == NULL || Choosen == false)
+			TestTarget = Cast<ATank>(HitResult->Actor.Get());
+		else
+			TestTargetFalse = Cast<ATank>(HitResult->Actor.Get());
+		if (TestTargetFalse == TestTarget) TestTargetFalse = NULL;
+		if (TestTarget != NULL && !TestTarget->IsPendingKill() && Choosen == false && TestTarget->Choosen == false)
 		{
-			//TestTarget->DamageTaken(5.f);
+			//TestTarget->DamageTaken(10.f);
 			TestTarget->Hitt();
+			TestTarget->Choosen = true;
+			TestTarget->Choice(TestTarget->Choosen);
+			Choosen = true;
+		}
+		else if (TestTargetFalse == NULL &&TestTarget != NULL && !TestTarget->IsPendingKill() && Choosen == true && TestTarget->Choosen == true)
+		{
+			TestTarget->Hitt();
+			TestTarget->Choosen = false;
+			TestTarget->Choice(TestTarget->Choosen);
+			Choosen = false;
+		}
+		if (TestTargetFalse != NULL && TestTarget != NULL && !TestTarget->IsPendingKill() && Choosen == true && TestTarget->Choosen == true)
+		{
+			TestTargetFalse->Hitt();
+			TestTargetFalse->Choosen = true;
+			TestTargetFalse->Choice(TestTarget->Choosen);
+			TestTarget->Hitt();
+			TestTarget->Choosen = false;
+			TestTarget->Choice(TestTarget->Choosen);
+			TestTarget = TestTargetFalse;
+			TestTargetFalse = NULL;
 		}
 	}
 }
@@ -163,6 +193,16 @@ void ADwaCharacter::MoveRight(float Value)
 		AddMovementInput(Direction, Value);
 	}
 }
+void ADwaCharacter::MoveUp(float value)
+{
+	if ((Controller != NULL) && (value != 0.0f))
+	{
+		const FRotator Rotation = Controller->GetControlRotation();
+		const FRotator YawRotation(0, Rotation.Yaw, 0);
+		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Z);
+		AddMovementInput(Direction, value);
+	}
+}
 
 void ADwaCharacter::BeginPickup()
 {
@@ -179,4 +219,43 @@ void ADwaCharacter::ShowInventory()
 		GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("Item: %s"), *something));
 	}
 }
-
+void ADwaCharacter::ObjUp()
+{
+	if (Choosen == true)
+	{
+		if (TestTarget->Choosen == true)
+		{
+			TestTarget->TMove(1, false);
+		}
+	}
+}
+void ADwaCharacter::ObjDown()
+{
+	if (Choosen == true)
+	{
+		if (TestTarget->Choosen == true)
+		{
+			TestTarget->TMove(1, true);
+		}
+	}
+}
+void ADwaCharacter::ObjRight()
+{
+	if (Choosen == true)
+	{
+		if (TestTarget->Choosen == true)
+		{
+			TestTarget->TMove(2, false);
+		}
+	}
+}
+void ADwaCharacter::ObjLeft()
+{
+	if (Choosen == true)
+	{
+		if (TestTarget->Choosen == true)
+		{
+			TestTarget->TMove(2, true);
+		}
+	}
+}

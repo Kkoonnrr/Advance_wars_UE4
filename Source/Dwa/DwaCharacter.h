@@ -1,7 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #pragma once
-
+#include "Tank.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "DwaCharacter.generated.h"
@@ -33,18 +33,18 @@ public:
 	/** Base look up/down rate, in deg/sec. Other scaling may affect final rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
 	float BaseLookUpRate;
+	bool Choosen;
 
 protected:
 
 	/** Resets HMD orientation in VR. */
 	void OnResetVR();
-
+	void MoveUp(float value);
 	/** Called for forwards/backward input */
 	void MoveForward(float Value);
 
 	/** Called for side to side input */
 	void MoveRight(float Value);
-
 	/** 
 	 * Called via input to turn at a given rate. 
 	 * @param Rate	This is a normalized rate, i.e. 1.0 means 100% of desired turn rate
@@ -62,7 +62,10 @@ protected:
 
 	/** Handler for when a touch input stops. */
 	void TouchStopped(ETouchIndex::Type FingerIndex, FVector Location);
-
+	void ObjUp();
+	void ObjDown();
+	void ObjLeft();
+	void ObjRight();
 	void BeginPickup();
 	void EndPickup();
 	void ShowInventory();
@@ -72,6 +75,8 @@ protected:
 	// End of APawn interface
 	void Hit();
 public:
+	ATank* TestTarget;
+	ATank* TestTargetFalse;
 	UPROPERTY(EditDefaultsOnly, Category = "Spawning")
 		TSubclassOf<class AActor> ActorToSpawn;
 	/** Returns CameraBoom subobject **/

@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
+#include "Marker.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Tank.generated.h"
@@ -20,25 +21,32 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-
+	int rot;
+	AMarker* TestTarget;
 	UPROPERTY(EditAnywhere)
 		UShapeComponent* Box;
 
 	UPROPERTY(EditDefaultsOnly)
 		UStaticMeshComponent* Tank;
-
+	FRotator NewRotation;
 	FVector PlayerLocation = FVector(-1548.0f, 897.0f, 684.0f);
 	float Health;
-	float Roll;
+	bool Left;
 	float Pitch;
 	float Yaw;
+	bool Choosen;
 	void DamageTaken(float Damage);
-
+	void Choice(bool Choosen);
 	void DestroyTank();
-
+	void TMove(float Axis, bool sign);
 	void Hitt();
-
 	UPROPERTY(EditDefaultsOnly, Category = "Spawning")
 		TSubclassOf<class AActor> ActorToSpawn;
+	UPROPERTY(EditDefaultsOnly, Category = "Spawning")
+		TSubclassOf<class AActor> MarkerToSpawn;
+	UPROPERTY(EditDefaultsOnly, Category = "Moving")
+		float forward;
+	//UPROPERTY(EditDefaultsOnly, Category = "Moving")
+		//float right;
+	int Mod(float one, float two);
 };

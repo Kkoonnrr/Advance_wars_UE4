@@ -53,9 +53,7 @@ public:
 		FString ItemName = FString(TEXT(""));
 
 	void PickUp();
-
 	void GetPlayer(AActor* Player);
-
 	bool BItemIsInRange = false;
 
 	UFUNCTION()
