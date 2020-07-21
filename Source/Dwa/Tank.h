@@ -31,15 +31,23 @@ public:
 	FRotator NewRotation;
 	FVector PlayerLocation = FVector(-1548.0f, 897.0f, 684.0f);
 	float Health;
+	bool Move;
 	bool Left;
-	float Pitch;
-	float Yaw;
+	bool Right;
+	bool Forward;
+	bool Backward;
 	bool Choosen;
 	void DamageTaken(float Damage);
 	void Choice(bool Choosen);
 	void DestroyTank();
 	void TMove(float Axis, bool sign);
+	void TTMoveF(float Axis, bool sign);
+	void TTMoveL(float Axis, bool sign);
+	void TTMoveR(float Axis, bool sign);
+	void TTMoveB(float Axis, bool sign);
 	void Hitt();
+	float TAxis;
+	bool Tsign;
 	UPROPERTY(EditDefaultsOnly, Category = "Spawning")
 		TSubclassOf<class AActor> ActorToSpawn;
 	UPROPERTY(EditDefaultsOnly, Category = "Spawning")
