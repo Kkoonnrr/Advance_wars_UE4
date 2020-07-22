@@ -48,6 +48,8 @@ public:
 	void Hitt();
 	float TAxis;
 	bool Tsign;
+	FVector Actor;
+	FVector New;
 	UPROPERTY(EditDefaultsOnly, Category = "Spawning")
 		TSubclassOf<class AActor> ActorToSpawn;
 	UPROPERTY(EditDefaultsOnly, Category = "Spawning")

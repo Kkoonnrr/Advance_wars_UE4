@@ -27,13 +27,16 @@ ATank::ATank()
 	Move = false;
 	TAxis = 0;
 	Tsign = false;
+	Actor = GetActorLocation();
+	New = GetActorLocation();
 }
 
 // Called when the game starts or when spawned
 void ATank::BeginPlay()
 {
 	Super::BeginPlay();
-
+	Actor = GetActorLocation();
+	New = GetActorLocation();
 }
 
 // Called every frame
@@ -42,50 +45,76 @@ void ATank::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	if (!Left && rot != 179.f && !Left && rot != 180.f && !Left && rot != 181.f)
 	{
-		NewRotation = NewRotation + FRotator(0.f, 1.f, 0.f);
+		NewRotation = NewRotation + FRotator(0.f, 0.5f, 0.f);
 		if (NewRotation.Yaw > 181) NewRotation.Yaw = -179;
 		SetActorRotation(NewRotation);
 		rot = NewRotation.Yaw;
 		//GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("%f"), rot));
+	}
+	else if (!Left && New.Y != Actor.Y + forward)
+	{
+		New.Y++;// -= FVector(1.f, 0.f, 0.f);
+		SetActorLocation(New);
+		GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("%f"), New.Y));
 	}
 	else if (!Left)
 	{
 		Left = true;
 		TTMoveL(TAxis, Tsign);
 	}
-	if (!Forward && rot != -90.f)
+	if (!Forward && rot != -90.f && rot != -91.f && rot != -89.f)
 	{
-		NewRotation = NewRotation + FRotator(0.f, 1.f, 0.f);
+		NewRotation = NewRotation + FRotator(0.f, 0.5f, 0.f);
 		if (NewRotation.Yaw > 181) NewRotation.Yaw = -179;
 		SetActorRotation(NewRotation);
 		rot = NewRotation.Yaw;
-		//GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("%f"), rot));
+		//GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("1")));
+		//GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("%f"), New.X));
+	}
+	else if (!Forward && New.X != Actor.X-forward)
+	{
+		New.X--;// -= FVector(1.f, 0.f, 0.f);
+		SetActorLocation(New);
+		GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("%f"), New.X));
 	}
 	else if (!Forward)
 	{
+		GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("3")));
 		Forward = true;
 		TTMoveF(TAxis, Tsign);
 	}
-	if (!Right && rot != 0.f)
+	if (!Right && rot != 0.f && rot != -1.f && rot != -1.f)
 	{
-		NewRotation = NewRotation + FRotator(0.f, 1.f, 0.f);
+		NewRotation = NewRotation + FRotator(0.f, 0.5f, 0.f);
 		if (NewRotation.Yaw > 181) NewRotation.Yaw = -179;
 		SetActorRotation(NewRotation);
 		rot = NewRotation.Yaw;
 		//GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("%f"), rot));
+	}
+	else if (!Right && New.Y != Actor.Y - forward)
+	{
+		New.Y--;// -= FVector(1.f, 0.f, 0.f);
+		SetActorLocation(New);
+		GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("%f"), New.Y));
 	}
 	else if (!Right)
 	{
 		Right = true;
 		TTMoveR(TAxis, Tsign);
 	}
-	if (!Backward && rot != 90.f)
+	if (!Backward && rot != 90.f && rot != 91.f && rot != 89.f)
 	{
-		NewRotation = NewRotation + FRotator(0.f, 1.f, 0.f);
+		NewRotation = NewRotation + FRotator(0.f, 0.5f, 0.f);
 		if (NewRotation.Yaw > 181) NewRotation.Yaw = -179;
 		SetActorRotation(NewRotation);
 		rot = NewRotation.Yaw;
 		//GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("%f"), rot));
+	}
+	else if (!Backward && New.X != Actor.X + forward)
+	{
+		New.X++;// -= FVector(1.f, 0.f, 0.f);
+		SetActorLocation(New);
+		GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("%f"), New.X));
 	}
 	else if (!Backward)
 	{
@@ -156,6 +185,8 @@ void ATank::Hitt()
 }
 void ATank::TMove(float Axis, bool sign)
 {
+	Actor = GetActorLocation();
+	New = GetActorLocation();
 	if (Axis == 1 && sign == false)
 	{
 		TAxis = 1;
@@ -164,15 +195,15 @@ void ATank::TMove(float Axis, bool sign)
 		//FVector NewLocation = ActorLocation + FVector(-forward, 0.f, 0.f);
 		NewRotation = GetActorRotation();
 		rot = NewRotation.Yaw;
-		if (rot != -90.f && rot < -100.f || rot != -90.f && rot > -80.f)
+		//if (rot != -90.f && rot < -100.f || rot != -90.f && rot > -80.f)
 			Forward = false;
-		else
-		{
-			FVector ActorLocation = GetActorLocation();
-			FVector NewLocation = ActorLocation + FVector(-forward, 0.f, 0.f);
-			SetActorLocation(NewLocation);
+		//else
+		//{
+			//FVector ActorLocation = GetActorLocation();
+			//FVector NewLocation = ActorLocation + FVector(-forward, 0.f, 0.f);
+			//SetActorLocation(NewLocation);
 			TestTarget->MMove(Axis, -forward);
-		}
+		//}
 		Move = true;
 		//SetActorLocation(NewLocation);
 		//TestTarget->MMove(Axis, -forward);
@@ -185,15 +216,15 @@ void ATank::TMove(float Axis, bool sign)
 		//FVector NewLocation = ActorLocation + FVector(forward, 0.f, 0.f);
 		NewRotation = GetActorRotation();
 		rot = NewRotation.Yaw;
-		if (rot != 90.f && rot < 80.f || rot != 90.f && rot > 100.f)
+		//if (rot != 90.f && rot < 80.f || rot != 90.f && rot > 100.f)
 			Backward = false;
-		else
-		{
-			FVector ActorLocation = GetActorLocation();
-			FVector NewLocation = ActorLocation + FVector(forward, 0.f, 0.f);
-			SetActorLocation(NewLocation);
+		//else
+		//{
+			//FVector ActorLocation = GetActorLocation();
+			//FVector NewLocation = ActorLocation + FVector(forward, 0.f, 0.f);
+			//SetActorLocation(NewLocation);
 			TestTarget->MMove(Axis, forward);
-		}
+		//}
 		//SetActorLocation(NewLocation);
 		//TestTarget->MMove(Axis, forward);
 		Move = true;
@@ -206,15 +237,15 @@ void ATank::TMove(float Axis, bool sign)
 		//FVector NewLocation = ActorLocation + FVector(0.f, -forward, 0.f);
 		NewRotation = GetActorRotation();
 		rot = NewRotation.Yaw;
-		if (rot != 0.f && rot < -10.f || rot != 0.f && rot > 10.f)
+		//if (rot != 0.f && rot < -10.f || rot != 0.f && rot > 10.f)
 			Right = false;
-		else
-		{
-			FVector ActorLocation = GetActorLocation();
-			FVector NewLocation = ActorLocation + FVector(0.f, -forward, 0.f);
-			SetActorLocation(NewLocation);
+		//else
+		//{
+			//FVector ActorLocation = GetActorLocation();
+			//FVector NewLocation = ActorLocation + FVector(0.f, -forward, 0.f);
+			//SetActorLocation(NewLocation);
 			TestTarget->MMove(Axis, -forward);
-		}
+		//}
 		//SetActorLocation(NewLocation);
 		//TestTarget->MMove(Axis, -forward);
 		Move = true;
@@ -227,15 +258,15 @@ void ATank::TMove(float Axis, bool sign)
 		//FVector NewLocation = ActorLocation + FVector(0.f, forward, 0.f);
 		NewRotation = GetActorRotation();
 		rot = NewRotation.Yaw;
-		if (rot != 179.f && rot < 170.f || rot != 179.f && rot > - 170.f)
+		//if (rot != 179.f && rot < 170.f || rot != 179.f && rot > - 170.f)
 			Left = false;
-		else
-		{
-			FVector ActorLocation = GetActorLocation();
-			FVector NewLocation = ActorLocation + FVector(0.f, forward, 0.f);
-			SetActorLocation(NewLocation);
+		//else
+		//{
+			//FVector ActorLocation = GetActorLocation();
+			//FVector NewLocation = ActorLocation + FVector(0.f, forward, 0.f);
+			//SetActorLocation(NewLocation);
 			TestTarget->MMove(Axis, forward);
-		}
+		//}
 		//NewRotation = FRotator(0.f, 180.f, 0.f);
 		//SetActorRotation(NewRotation);
 		Move = true;
@@ -250,9 +281,9 @@ void ATank::TTMoveL(float Axis, bool sign)
 	if (Left == true && Move == true)
 	{
 		GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("Left")));
-		FVector ActorLocation = GetActorLocation();
-		FVector NewLocation = ActorLocation + FVector(0.f, forward, 0.f);
-		SetActorLocation(NewLocation);
+		//FVector ActorLocation = GetActorLocation();
+		//FVector NewLocation = ActorLocation + FVector(0.f, forward, 0.f);
+		//SetActorLocation(NewLocation);
 		TestTarget->MMove(Axis, forward);
 		Move = false;
 	}
@@ -262,9 +293,9 @@ void ATank::TTMoveF(float Axis, bool sign)
 	if (Forward == true && Move == true)
 	{
 		GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("Forward")));
-		FVector ActorLocation = GetActorLocation();
-		FVector NewLocation = ActorLocation + FVector(-forward, 0.f, 0.f);
-		SetActorLocation(NewLocation);
+		//FVector ActorLocation = GetActorLocation();
+		//FVector NewLocation = ActorLocation + FVector(-forward, 0.f, 0.f);
+		//SetActorLocation(NewLocation);
 		TestTarget->MMove(Axis, -forward);
 		Move = false;
 	}
@@ -274,9 +305,9 @@ void ATank::TTMoveR(float Axis, bool sign)
 	if (Right == true && Move == true)
 	{
 		GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("Right")));
-		FVector ActorLocation = GetActorLocation();
-		FVector NewLocation = ActorLocation + FVector(0.f, -forward, 0.f);
-		SetActorLocation(NewLocation);
+		//FVector ActorLocation = GetActorLocation();
+		//FVector NewLocation = ActorLocation + FVector(0.f, -forward, 0.f);
+		//SetActorLocation(NewLocation);
 		TestTarget->MMove(Axis, -forward);
 		Move = false;
 	}
@@ -286,9 +317,9 @@ void ATank::TTMoveB(float Axis, bool sign)
 	if (Backward == true && Move == true)
 	{
 		GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("Backward")));
-		FVector ActorLocation = GetActorLocation();
-		FVector NewLocation = ActorLocation + FVector(forward, 0.f, 0.f);
-		SetActorLocation(NewLocation);
+		//FVector ActorLocation = GetActorLocation();
+		//FVector NewLocation = ActorLocation + FVector(forward, 0.f, 0.f);
+		//SetActorLocation(NewLocation);
 		TestTarget->MMove(Axis, forward);
 		Move = false;
 	}
