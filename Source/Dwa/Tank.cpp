@@ -5,6 +5,7 @@
 #include "Bullet.h"
 #include "Marker.h"
 #include "Tank.h"
+#include "Trawa.h"
 #include "Components/BoxComponent.h"
 #include "Containers/UnrealString.h"
 #include "Engine.h"
@@ -55,7 +56,6 @@ void ATank::BeginPlay()
 void ATank::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	//Text();
 	if (!Left && rot != 179.f && !Left && rot != 180.f && !Left && rot != 181.f)
 	{
 		NewRotation = NewRotation + FRotator(0.f, 0.2f, 0.f);
@@ -64,7 +64,7 @@ void ATank::Tick(float DeltaTime)
 		rot = NewRotation.Yaw;
 		//GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("%f"), rot));
 	}
-	else if (!Left && New.Y != Actor.Y + forward)
+	else if (!Left && New.Y != Actor.Y + forward && Empty == true && -0.5 < MoveLimit)
 	{
 		New.Y++;// -= FVector(1.f, 0.f, 0.f);
 		SetActorLocation(New);
@@ -72,6 +72,7 @@ void ATank::Tick(float DeltaTime)
 	}
 	else if (!Left)
 	{
+		Empty = false;
 		Left = true;
 		TTMoveL(TAxis, Tsign);
 	}
@@ -84,7 +85,7 @@ void ATank::Tick(float DeltaTime)
 		//GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("1")));
 		//GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("%f"), New.X));
 	}
-	else if (!Forward && New.X != Actor.X-forward && Empty == true)
+	else if (!Forward && New.X != Actor.X-forward && Empty == true && -0.5 < MoveLimit)
 	{
 		New.X--;// -= FVector(1.f, 0.f, 0.f);
 		SetActorLocation(New);
@@ -105,7 +106,7 @@ void ATank::Tick(float DeltaTime)
 		rot = NewRotation.Yaw;
 		//GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("%f"), rot));
 	}
-	else if (!Right && New.Y != Actor.Y - forward)
+	else if (!Right && New.Y != Actor.Y - forward && Empty == true && -0.5 < MoveLimit)
 	{
 		New.Y--;// -= FVector(1.f, 0.f, 0.f);
 		SetActorLocation(New);
@@ -113,6 +114,7 @@ void ATank::Tick(float DeltaTime)
 	}
 	else if (!Right)
 	{
+		Empty = false;
 		Right = true;
 		TTMoveR(TAxis, Tsign);
 	}
@@ -124,7 +126,7 @@ void ATank::Tick(float DeltaTime)
 		rot = NewRotation.Yaw;
 		//GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("%f"), rot));
 	}
-	else if (!Backward && New.X != Actor.X + forward && Empty == true)
+	else if (!Backward && New.X != Actor.X + forward && Empty == true && -0.5 < MoveLimit)
 	{
 		New.X++;// -= FVector(1.f, 0.f, 0.f);
 		SetActorLocation(New);
@@ -168,6 +170,23 @@ void ATank::Choice(bool Choose)
 		{
 			//GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("cos")));
 			TestTarget = Cast<AMarker>(HitResult->Actor.Get());
+		}
+		TArray<FHitResult> HitResults;
+		HitResults.Init(FHitResult(ForceInit), 10);
+		FVector StartTr = GetActorLocation() - FVector(0.f, 0.f, 500.f);
+		FVector ForwardVe = FVector(500.f, 0.f, 0.f);
+		FVector EndTr = ((ForwardVe * MoveLimit) + StartTr);
+		FCollisionQueryParams* TracePa = new FCollisionQueryParams();
+		TracePa->bTraceComplex = false;
+		FCollisionResponseParams ResponseParams(ECollisionResponse::ECR_Overlap);
+		GetWorld()->LineTraceMultiByChannel(HitResults, StartTr, EndTr, ECC_Visibility, *TracePa, ResponseParams);
+		DrawDebugLine(GetWorld(), StartTr, EndTr, FColor::Red, false, 5.f);
+		for (int x = 0; x != HitResults.Num(); ++x)
+		{
+			GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("gowno")));
+			AStaticMeshActor* Field = Cast<AStaticMeshActor>(HitResults[x].Actor.Get());
+			ATrawa* Trawaa = Cast<ATrawa>(HitResults[x].Actor.Get());
+			Trawaa->ChangeMaterial();
 		}
 	}
 	else 
@@ -220,11 +239,11 @@ void ATank::Text()
 }
 void ATank::TMove(float Axis, bool sign)
 {
-	MoveLimit-=1;
+	
 	Actor = GetActorLocation();
 	New = GetActorLocation();
-	if (-0.5 < MoveLimit)
-	{
+	//if (-0.5 < MoveLimit)
+	//{
 		if (Axis == 1 && sign == false)
 		{
 			FHitResult* HitR = new FHitResult();
@@ -235,6 +254,7 @@ void ATank::TMove(float Axis, bool sign)
 			TraceP.AddIgnoredActor(this);
 			if (GetWorld()->LineTraceSingleByChannel(*HitR, StartT, EndT, ECC_Visibility, TraceP)==NULL)
 				Empty = true;
+			if (Empty == true)  MoveLimit -= 1;
 			TAxis = 1;
 			Tsign = false;
 			//FVector ActorLocation = GetActorLocation();
@@ -264,6 +284,7 @@ void ATank::TMove(float Axis, bool sign)
 			TraceP.AddIgnoredActor(this);
 			if (GetWorld()->LineTraceSingleByChannel(*HitR, StartT, EndT, ECC_Visibility, TraceP) == NULL)
 				Empty = true;
+			if (Empty == true)  MoveLimit -= 1;
 				TAxis = 1;
 				Tsign = true;
 				//FVector ActorLocation = GetActorLocation();
@@ -292,7 +313,8 @@ void ATank::TMove(float Axis, bool sign)
 			FCollisionQueryParams TraceP;
 			TraceP.AddIgnoredActor(this);
 			if (GetWorld()->LineTraceSingleByChannel(*HitR, StartT, EndT, ECC_Visibility, TraceP) == NULL)
-			{
+				Empty = true;
+			if (Empty == true)  MoveLimit -= 1;
 				TAxis = 2;
 				Tsign = false;
 				//FVector ActorLocation = GetActorLocation();
@@ -311,7 +333,7 @@ void ATank::TMove(float Axis, bool sign)
 				//SetActorLocation(NewLocation);
 				//TestTarget->MMove(Axis, -forward);
 				Move = true;
-			}
+
 		}
 		else if (Axis == 2 && sign == true)
 		{
@@ -322,7 +344,8 @@ void ATank::TMove(float Axis, bool sign)
 			FCollisionQueryParams TraceP;
 			TraceP.AddIgnoredActor(this);
 			if (GetWorld()->LineTraceSingleByChannel(*HitR, StartT, EndT, ECC_Visibility, TraceP) == NULL)
-			{
+				Empty = true;
+			if (Empty == true)  MoveLimit -= 1;
 			TAxis = 2;
 			Tsign = true;
 			//FVector ActorLocation = GetActorLocation();
@@ -344,10 +367,9 @@ void ATank::TMove(float Axis, bool sign)
 			//SetActorLocation(NewLocation);
 			//TestTarget->MMove(Axis, forward);
 			//for (rot; 90 > rot; rot++)
-				//Tick(1.f);
-			}
+			//Tick(1.f);
 		}
-	}
+	//}
 }	
 void ATank::TTMoveL(float Axis, bool sign)
 {

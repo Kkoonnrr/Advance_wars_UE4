@@ -14,11 +14,18 @@ class DWA_API ATrawa : public AActor
 public:	
 	// Sets default values for this actor's properties
 	ATrawa();
-
+	UFUNCTION()
+		void ChangeMaterial();
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditDefaultsOnly)
 	UStaticMeshComponent* SM_Block;
+
+	UPROPERTY(EditAnyWhere)
+		class UMaterial* OnMove;
+	//UPROPERTY(EditAnyWhere)
+		//class UMaterial* OffMove;
+
 };
