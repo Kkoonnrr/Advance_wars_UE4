@@ -1,5 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+#include "DwaCharacter.h"
 #include "Math/Rotator.h"
 #include "Bullet.h"
 #include "Marker.h"
@@ -11,41 +12,53 @@
 // Sets default values
 ATank::ATank()
 {
-
+	Health = 100.f;
+	HealthText = CreateDefaultSubobject<UTextRenderComponent>(TEXT("HealthText"));
+	HealthText->SetWorldSize(100.f);
+	HealthText->SetTextRenderColor(FColor::Blue);
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	Box = CreateDefaultSubobject<UBoxComponent>(TEXT("Box"));
-	Tank = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Tank Mesh"));
+	Box->SetGenerateOverlapEvents(true);
 	RootComponent = Box;
+	Tank = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Tank Mesh"));
 	Tank->AttachTo(RootComponent);
-	Health = 10.f;
+	HealthText->AttachTo(RootComponent);
 	Choosen = false;
 	Left = true;
 	Right = true;
 	Forward = true;
 	Backward = true;
 	Move = false;
+	Empty = false;
 	TAxis = 0;
 	Tsign = false;
 	Actor = GetActorLocation();
 	New = GetActorLocation();
+	Box->OnComponentBeginOverlap.AddDynamic(this, &ATank::TriggerEnter);
+	//Box->OnComponentEndOverlap.AddDynamic(this, &ATank::TriggerExit);
 }
 
 // Called when the game starts or when spawned
 void ATank::BeginPlay()
 {
+	//FVector dupa = (0.f, 0.f, 0.f);
 	Super::BeginPlay();
 	Actor = GetActorLocation();
 	New = GetActorLocation();
+	HealthText->SetText(FString::Printf(TEXT("Health: %0.1lf"), Health));
+	//HealthText->SetRelativeLocation(dupa);
+	Text();
 }
 
 // Called every frame
 void ATank::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	//Text();
 	if (!Left && rot != 179.f && !Left && rot != 180.f && !Left && rot != 181.f)
 	{
-		NewRotation = NewRotation + FRotator(0.f, 0.5f, 0.f);
+		NewRotation = NewRotation + FRotator(0.f, 0.2f, 0.f);
 		if (NewRotation.Yaw > 181) NewRotation.Yaw = -179;
 		SetActorRotation(NewRotation);
 		rot = NewRotation.Yaw;
@@ -55,7 +68,7 @@ void ATank::Tick(float DeltaTime)
 	{
 		New.Y++;// -= FVector(1.f, 0.f, 0.f);
 		SetActorLocation(New);
-		GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("%f"), New.Y));
+		//GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("%f"), New.Y));
 	}
 	else if (!Left)
 	{
@@ -64,28 +77,29 @@ void ATank::Tick(float DeltaTime)
 	}
 	if (!Forward && rot != -90.f && rot != -91.f && rot != -89.f)
 	{
-		NewRotation = NewRotation + FRotator(0.f, 0.5f, 0.f);
+		NewRotation = NewRotation + FRotator(0.f, 0.2f, 0.f);
 		if (NewRotation.Yaw > 181) NewRotation.Yaw = -179;
 		SetActorRotation(NewRotation);
 		rot = NewRotation.Yaw;
 		//GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("1")));
 		//GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("%f"), New.X));
 	}
-	else if (!Forward && New.X != Actor.X-forward)
+	else if (!Forward && New.X != Actor.X-forward && Empty == true)
 	{
 		New.X--;// -= FVector(1.f, 0.f, 0.f);
 		SetActorLocation(New);
-		GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("%f"), New.X));
+		//GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("%f"), New.X));
 	}
 	else if (!Forward)
 	{
-		GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("3")));
+		//GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("3")));
+		Empty = false;
 		Forward = true;
 		TTMoveF(TAxis, Tsign);
 	}
 	if (!Right && rot != 0.f && rot != -1.f && rot != -1.f)
 	{
-		NewRotation = NewRotation + FRotator(0.f, 0.5f, 0.f);
+		NewRotation = NewRotation + FRotator(0.f, 0.2f, 0.f);
 		if (NewRotation.Yaw > 181) NewRotation.Yaw = -179;
 		SetActorRotation(NewRotation);
 		rot = NewRotation.Yaw;
@@ -95,7 +109,7 @@ void ATank::Tick(float DeltaTime)
 	{
 		New.Y--;// -= FVector(1.f, 0.f, 0.f);
 		SetActorLocation(New);
-		GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("%f"), New.Y));
+		//GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("%f"), New.Y));
 	}
 	else if (!Right)
 	{
@@ -104,20 +118,21 @@ void ATank::Tick(float DeltaTime)
 	}
 	if (!Backward && rot != 90.f && rot != 91.f && rot != 89.f)
 	{
-		NewRotation = NewRotation + FRotator(0.f, 0.5f, 0.f);
+		NewRotation = NewRotation + FRotator(0.f, 0.2f, 0.f);
 		if (NewRotation.Yaw > 181) NewRotation.Yaw = -179;
 		SetActorRotation(NewRotation);
 		rot = NewRotation.Yaw;
 		//GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("%f"), rot));
 	}
-	else if (!Backward && New.X != Actor.X + forward)
+	else if (!Backward && New.X != Actor.X + forward && Empty == true)
 	{
 		New.X++;// -= FVector(1.f, 0.f, 0.f);
 		SetActorLocation(New);
-		GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("%f"), New.X));
+		//GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("%f"), New.X));
 	}
 	else if (!Backward)
 	{
+		Empty = false;
 		Backward = true;
 		TTMoveB(TAxis, Tsign);
 	}
@@ -126,10 +141,10 @@ void ATank::Tick(float DeltaTime)
 void ATank::DamageTaken(float Damage)
 {
 	Health -= Damage;
+	HealthText->SetText(FString::Printf(TEXT("Health: %0.1lf"), Health));
 	if (Health <= 0.f)
 	{
 		DestroyTank();
-
 	}
 }
 
@@ -151,7 +166,7 @@ void ATank::Choice(bool Choose)
 		TraceParams.AddIgnoredActor(this);
 		if (GetWorld()->LineTraceSingleByChannel(*HitResult, StartTrace, EndTrace, ECC_Visibility, TraceParams))
 		{
-			GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("cos")));
+			//GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("cos")));
 			TestTarget = Cast<AMarker>(HitResult->Actor.Get());
 		}
 	}
@@ -159,7 +174,7 @@ void ATank::Choice(bool Choose)
 	{
 		if (TestTarget != NULL)
 		{
-			GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("Itemmmmm")));
+			//GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("Itemmmmm")));
 			TestTarget->MarkerDestroy();
 		}
 	}
@@ -183,104 +198,162 @@ void ATank::Hitt()
 	FActorSpawnParameters SpawnParams;
 	AActor* SpawnedActorRef = GetWorld()->SpawnActor<AActor>(ActorToSpawn, SpawnLocation, SpawnRotation, SpawnParams);
 }
+void ATank::TriggerEnter(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool FromSweep, const FHitResult& SweepResult)
+{
+	Health -= 10;
+	GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("DUPA")));
+	DamageTaken(10.f);
+}
+//void ATank::TriggerExit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+//{
+//}
+void ATank::Text()
+{
+	//FVector lolL = GetActorLocation();
+	//lolL = lolL + (0, 0, 180.f);
+	ADwaCharacter* Character = Cast< ADwaCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
+	FRotator lol = Character->GetActorRotation();
+	lol.Yaw += 180.f;
+	//lolL = lolL + (0, 0, 180.f);
+	HealthText->SetRelativeRotation(lol);
+	//HealthText->SetRelativeLocation(lolL);
+}
 void ATank::TMove(float Axis, bool sign)
 {
+	MoveLimit-=1;
 	Actor = GetActorLocation();
 	New = GetActorLocation();
-	if (Axis == 1 && sign == false)
+	if (-0.5 < MoveLimit)
 	{
-		TAxis = 1;
-		Tsign = false;
-		//FVector ActorLocation = GetActorLocation();
-		//FVector NewLocation = ActorLocation + FVector(-forward, 0.f, 0.f);
-		NewRotation = GetActorRotation();
-		rot = NewRotation.Yaw;
-		//if (rot != -90.f && rot < -100.f || rot != -90.f && rot > -80.f)
-			Forward = false;
-		//else
-		//{
+		if (Axis == 1 && sign == false)
+		{
+			FHitResult* HitR = new FHitResult();
+			FVector StartT = GetActorLocation();
+			FVector ForwardV = FVector(-1.f, 0.f, 0.f);
+			FVector EndT = ((ForwardV * 500.f) + StartT);
+			FCollisionQueryParams TraceP;
+			TraceP.AddIgnoredActor(this);
+			if (GetWorld()->LineTraceSingleByChannel(*HitR, StartT, EndT, ECC_Visibility, TraceP)==NULL)
+				Empty = true;
+			TAxis = 1;
+			Tsign = false;
 			//FVector ActorLocation = GetActorLocation();
 			//FVector NewLocation = ActorLocation + FVector(-forward, 0.f, 0.f);
-			//SetActorLocation(NewLocation);
+			NewRotation = GetActorRotation();
+			rot = NewRotation.Yaw;
+			//if (rot != -90.f && rot < -100.f || rot != -90.f && rot > -80.f)
+			Forward = false;
+			//else
+			//{
+				//FVector ActorLocation = GetActorLocation();
+				//FVector NewLocation = ActorLocation + FVector(-forward, 0.f, 0.f);
+				//SetActorLocation(NewLocation);
 			TestTarget->MMove(Axis, -forward);
-		//}
-		Move = true;
-		//SetActorLocation(NewLocation);
-		//TestTarget->MMove(Axis, -forward);
-	}
-	else if (Axis == 1 && sign == true)
-	{
-		TAxis = 1;
-		Tsign = true;
-		//FVector ActorLocation = GetActorLocation();
-		//FVector NewLocation = ActorLocation + FVector(forward, 0.f, 0.f);
-		NewRotation = GetActorRotation();
-		rot = NewRotation.Yaw;
-		//if (rot != 90.f && rot < 80.f || rot != 90.f && rot > 100.f)
-			Backward = false;
-		//else
-		//{
-			//FVector ActorLocation = GetActorLocation();
-			//FVector NewLocation = ActorLocation + FVector(forward, 0.f, 0.f);
+			//}
+			Move = true;
 			//SetActorLocation(NewLocation);
-			TestTarget->MMove(Axis, forward);
-		//}
-		//SetActorLocation(NewLocation);
-		//TestTarget->MMove(Axis, forward);
-		Move = true;
-	}
-	else if (Axis == 2 && sign == false)
-	{
-		TAxis = 2;
-		Tsign = false;
-		//FVector ActorLocation = GetActorLocation();
-		//FVector NewLocation = ActorLocation + FVector(0.f, -forward, 0.f);
-		NewRotation = GetActorRotation();
-		rot = NewRotation.Yaw;
-		//if (rot != 0.f && rot < -10.f || rot != 0.f && rot > 10.f)
-			Right = false;
-		//else
-		//{
-			//FVector ActorLocation = GetActorLocation();
-			//FVector NewLocation = ActorLocation + FVector(0.f, -forward, 0.f);
-			//SetActorLocation(NewLocation);
-			TestTarget->MMove(Axis, -forward);
-		//}
-		//SetActorLocation(NewLocation);
-		//TestTarget->MMove(Axis, -forward);
-		Move = true;
-	}
-	else if (Axis == 2 && sign == true)
-	{
-		TAxis = 2;
-		Tsign = true;
-		//FVector ActorLocation = GetActorLocation();
-		//FVector NewLocation = ActorLocation + FVector(0.f, forward, 0.f);
-		NewRotation = GetActorRotation();
-		rot = NewRotation.Yaw;
-		//if (rot != 179.f && rot < 170.f || rot != 179.f && rot > - 170.f)
-			Left = false;
-		//else
-		//{
+			//TestTarget->MMove(Axis, -forward);
+		}
+		else if (Axis == 1 && sign == true)
+		{
+			FHitResult* HitR = new FHitResult();
+			FVector StartT = GetActorLocation();
+			FVector ForwardV = FVector(1.f, 0.f, 0.f);
+			FVector EndT = ((ForwardV * 500.f) + StartT);
+			FCollisionQueryParams TraceP;
+			TraceP.AddIgnoredActor(this);
+			if (GetWorld()->LineTraceSingleByChannel(*HitR, StartT, EndT, ECC_Visibility, TraceP) == NULL)
+				Empty = true;
+				TAxis = 1;
+				Tsign = true;
+				//FVector ActorLocation = GetActorLocation();
+				//FVector NewLocation = ActorLocation + FVector(forward, 0.f, 0.f);
+				NewRotation = GetActorRotation();
+				rot = NewRotation.Yaw;
+				//if (rot != 90.f && rot < 80.f || rot != 90.f && rot > 100.f)
+				Backward = false;
+				//else
+				//{
+					//FVector ActorLocation = GetActorLocation();
+					//FVector NewLocation = ActorLocation + FVector(forward, 0.f, 0.f);
+					//SetActorLocation(NewLocation);
+				TestTarget->MMove(Axis, forward);
+				//}
+				//SetActorLocation(NewLocation);
+				//TestTarget->MMove(Axis, forward);
+				Move = true;
+		}
+		else if (Axis == 2 && sign == false)
+		{
+			FHitResult* HitR = new FHitResult();
+			FVector StartT = GetActorLocation();
+			FVector ForwardV = FVector(0.f, -1.f, 0.f);
+			FVector EndT = ((ForwardV * 500.f) + StartT);
+			FCollisionQueryParams TraceP;
+			TraceP.AddIgnoredActor(this);
+			if (GetWorld()->LineTraceSingleByChannel(*HitR, StartT, EndT, ECC_Visibility, TraceP) == NULL)
+			{
+				TAxis = 2;
+				Tsign = false;
+				//FVector ActorLocation = GetActorLocation();
+				//FVector NewLocation = ActorLocation + FVector(0.f, -forward, 0.f);
+				NewRotation = GetActorRotation();
+				rot = NewRotation.Yaw;
+				//if (rot != 0.f && rot < -10.f || rot != 0.f && rot > 10.f)
+				Right = false;
+				//else
+				//{
+					//FVector ActorLocation = GetActorLocation();
+					//FVector NewLocation = ActorLocation + FVector(0.f, -forward, 0.f);
+					//SetActorLocation(NewLocation);
+				TestTarget->MMove(Axis, -forward);
+				//}
+				//SetActorLocation(NewLocation);
+				//TestTarget->MMove(Axis, -forward);
+				Move = true;
+			}
+		}
+		else if (Axis == 2 && sign == true)
+		{
+			FHitResult* HitR = new FHitResult();
+			FVector StartT = GetActorLocation();
+			FVector ForwardV = FVector(0.f, 1.f, 0.f);
+			FVector EndT = ((ForwardV * 500.f) + StartT);
+			FCollisionQueryParams TraceP;
+			TraceP.AddIgnoredActor(this);
+			if (GetWorld()->LineTraceSingleByChannel(*HitR, StartT, EndT, ECC_Visibility, TraceP) == NULL)
+			{
+			TAxis = 2;
+			Tsign = true;
 			//FVector ActorLocation = GetActorLocation();
 			//FVector NewLocation = ActorLocation + FVector(0.f, forward, 0.f);
-			//SetActorLocation(NewLocation);
+			NewRotation = GetActorRotation();
+			rot = NewRotation.Yaw;
+			//if (rot != 179.f && rot < 170.f || rot != 179.f && rot > - 170.f)
+			Left = false;
+			//else
+			//{
+				//FVector ActorLocation = GetActorLocation();
+				//FVector NewLocation = ActorLocation + FVector(0.f, forward, 0.f);
+				//SetActorLocation(NewLocation);
 			TestTarget->MMove(Axis, forward);
-		//}
-		//NewRotation = FRotator(0.f, 180.f, 0.f);
-		//SetActorRotation(NewRotation);
-		Move = true;
-		//SetActorLocation(NewLocation);
-		//TestTarget->MMove(Axis, forward);
-		//for (rot; 90 > rot; rot++)
-			//Tick(1.f);
+			//}
+			//NewRotation = FRotator(0.f, 180.f, 0.f);
+			//SetActorRotation(NewRotation);
+			Move = true;
+			//SetActorLocation(NewLocation);
+			//TestTarget->MMove(Axis, forward);
+			//for (rot; 90 > rot; rot++)
+				//Tick(1.f);
+			}
+		}
 	}
 }	
 void ATank::TTMoveL(float Axis, bool sign)
 {
 	if (Left == true && Move == true)
 	{
-		GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("Left")));
+		//GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("Left")));
 		//FVector ActorLocation = GetActorLocation();
 		//FVector NewLocation = ActorLocation + FVector(0.f, forward, 0.f);
 		//SetActorLocation(NewLocation);
@@ -292,7 +365,7 @@ void ATank::TTMoveF(float Axis, bool sign)
 {
 	if (Forward == true && Move == true)
 	{
-		GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("Forward")));
+		//GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("Forward")));
 		//FVector ActorLocation = GetActorLocation();
 		//FVector NewLocation = ActorLocation + FVector(-forward, 0.f, 0.f);
 		//SetActorLocation(NewLocation);
@@ -304,7 +377,7 @@ void ATank::TTMoveR(float Axis, bool sign)
 {
 	if (Right == true && Move == true)
 	{
-		GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("Right")));
+		//GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("Right")));
 		//FVector ActorLocation = GetActorLocation();
 		//FVector NewLocation = ActorLocation + FVector(0.f, -forward, 0.f);
 		//SetActorLocation(NewLocation);
@@ -316,7 +389,7 @@ void ATank::TTMoveB(float Axis, bool sign)
 {
 	if (Backward == true && Move == true)
 	{
-		GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("Backward")));
+		//GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("Backward")));
 		//FVector ActorLocation = GetActorLocation();
 		//FVector NewLocation = ActorLocation + FVector(forward, 0.f, 0.f);
 		//SetActorLocation(NewLocation);

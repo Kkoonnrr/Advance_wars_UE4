@@ -10,6 +10,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Engine.h"
 #include "Tank.h"
+#include "Factoryy.h"
 #include "Engine/World.h"
 //////////////////////////////////////////////////////////////////////////
 // ADwaCharacter
@@ -103,6 +104,13 @@ void ADwaCharacter::Hit()
 	if (GetWorld()->LineTraceSingleByChannel(*HitResult, StartTrace, EndTrace, ECC_Visibility, *TraceParams))
 	{
 		DrawDebugLine(GetWorld(), StartTrace, EndTrace, FColor::Green, false, 5.f);
+		if (Cast<AFactoryy>(HitResult->Actor.Get()) != NULL)
+		{
+			Factory = Cast<AFactoryy>(HitResult->Actor.Get());
+			GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("APUD")));
+			Factory->Create = true;
+			Factory->CreateTank();
+		}
 		if (TestTarget == NULL || Choosen == false)
 			TestTarget = Cast<ATank>(HitResult->Actor.Get());
 		else
@@ -134,6 +142,7 @@ void ADwaCharacter::Hit()
 			TestTarget = TestTargetFalse;
 			TestTargetFalse = NULL;
 		}
+
 	}
 }
 

@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
+#include "Components/TextRenderComponent.h"
 #include "Marker.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
@@ -17,6 +18,12 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+private:
+	//UPROPERTY(EditAnywhere, Category = BulletDecals);
+	//UMaterialInterface* BulletHoleDecals;
+	float Health;
+	UTextRenderComponent* HealthText;
+	void Text();
 
 public:	
 	// Called every frame
@@ -30,7 +37,6 @@ public:
 		UStaticMeshComponent* Tank;
 	FRotator NewRotation;
 	FVector PlayerLocation = FVector(-1548.0f, 897.0f, 684.0f);
-	float Health;
 	bool Move;
 	bool Left;
 	bool Right;
@@ -48,6 +54,8 @@ public:
 	void Hitt();
 	float TAxis;
 	bool Tsign;
+	bool Empty;
+	float MoveLimit = 3;
 	FVector Actor;
 	FVector New;
 	UPROPERTY(EditDefaultsOnly, Category = "Spawning")
@@ -59,4 +67,9 @@ public:
 	//UPROPERTY(EditDefaultsOnly, Category = "Moving")
 		//float right;
 	int Mod(float one, float two);
+	UFUNCTION()
+		void TriggerEnter(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool FromSweep, const FHitResult& SweepResult);
+	//UFUNCTION()
+		//void TriggerExit(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	
 };

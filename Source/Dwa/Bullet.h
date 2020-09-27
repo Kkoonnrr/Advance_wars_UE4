@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Tank.h"
 #include "Bullet.generated.h"
 
 UCLASS()
@@ -21,11 +22,20 @@ protected:
 
 public:
 	// Called every frame
+	FTimerHandle Time;
+	FVector all;
+	FVector begin;
+	FVector end;
+	float i;
+	ATank* TestTarget;
 	virtual void Tick(float DeltaTime) override;
 	UPROPERTY(EditAnywhere)
 		UStaticMeshComponent* BulletMesh;
-
+	UFUNCTION()
+		void Damage();
 	UPROPERTY(EditAnywhere, Category = "Speed")
 		float Velocity;
-
+private:
+	UPROPERTY(EditAnywhere, Category = BulletDecal)
+	UMaterialInterface* BulletHolrDecal;
 };

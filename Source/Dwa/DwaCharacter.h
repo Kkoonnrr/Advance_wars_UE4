@@ -2,6 +2,7 @@
 
 #pragma once
 #include "Tank.h"
+#include "Factoryy.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "DwaCharacter.generated.h"
@@ -76,6 +77,7 @@ protected:
 	void Hit();
 public:
 	ATank* TestTarget;
+	AFactoryy* Factory;
 	ATank* TestTargetFalse;
 	UPROPERTY(EditDefaultsOnly, Category = "Spawning")
 		TSubclassOf<class AActor> ActorToSpawn;
