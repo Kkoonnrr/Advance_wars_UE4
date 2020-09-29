@@ -56,6 +56,9 @@ public:
 	bool Tsign;
 	bool Empty;
 	float MoveLimit = 3;
+	float MoveFLimit;
+	float MoveTLimit;
+	int Counter;
 	FVector Actor;
 	FVector New;
 	UPROPERTY(EditDefaultsOnly, Category = "Spawning")

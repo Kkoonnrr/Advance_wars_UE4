@@ -173,9 +173,40 @@ void ATank::Choice(bool Choose)
 		}
 		TArray<FHitResult> HitResults;
 		HitResults.Init(FHitResult(ForceInit), 10);
-		FVector StartTr = GetActorLocation() - FVector(0.f, 0.f, 500.f);
+		MoveFLimit = 0;
+		Counter = 0;
+		do
+		{
+			FVector StartTr = GetActorLocation() - FVector(0.f, 0.f, 500.f)+ FVector(0.f+(500.f*Counter), 0.f, 0.f);
+			FVector ForwardVe = FVector(500.f, 0.f, 0.f);
+			FVector EndTr = (ForwardVe * 1 + StartTr);
+			FCollisionQueryParams* TracePa = new FCollisionQueryParams();
+			TracePa->bTraceComplex = false;
+			FCollisionResponseParams ResponseParams(ECollisionResponse::ECR_Overlap);
+			GetWorld()->LineTraceMultiByChannel(HitResults, StartTr, EndTr, ECC_Visibility, *TracePa, ResponseParams);
+			if (GetWorld()->LineTraceSingleByChannel(HitResults[0], StartTr + FVector(500.f, 0.f, 0.f), EndTr + FVector(500.f, 0.f, 0.f), ECC_Visibility, *TracePa) == NULL)
+			{
+				break;
+			}
+			DrawDebugLine(GetWorld(), StartTr + FVector(0.f, 0.f, 500.f), EndTr + FVector(0.f, 0.f, 500.f), FColor::Blue, false, 5.f);
+			for (int x = 0; x != HitResults.Num(); ++x)
+			{
+				if (x == 1)
+				{
+					AStaticMeshActor* Field = Cast<AStaticMeshActor>(HitResults[x].Actor.Get());
+					ATrawa* Trawaa = Cast<ATrawa>(HitResults[x].Actor.Get());
+					GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("%f"), Trawaa->MPCost));
+					MoveFLimit += Trawaa->MPCost;
+					Counter++;
+				}
+			}
+		//	Counter++;
+		//MoveFLimit += 0.2;
+		} while (MoveFLimit < MoveLimit);
+		//Counter = 0;
+		/*FVector StartTr = GetActorLocation() - FVector(500.f* MoveLimit, 0.f, 500.f);
 		FVector ForwardVe = FVector(500.f, 0.f, 0.f);
-		FVector EndTr = ((ForwardVe * MoveLimit) + StartTr);
+		FVector EndTr = ((ForwardVe * (MoveLimit*2)) + StartTr);
 		FCollisionQueryParams* TracePa = new FCollisionQueryParams();
 		TracePa->bTraceComplex = false;
 		FCollisionResponseParams ResponseParams(ECollisionResponse::ECR_Overlap);
@@ -187,7 +218,7 @@ void ATank::Choice(bool Choose)
 			AStaticMeshActor* Field = Cast<AStaticMeshActor>(HitResults[x].Actor.Get());
 			ATrawa* Trawaa = Cast<ATrawa>(HitResults[x].Actor.Get());
 			Trawaa->ChangeMaterial();
-		}
+		}*/
 	}
 	else 
 	{
