@@ -17,7 +17,7 @@ public:
 	UFUNCTION()
 		void ChangeMaterial();
 	UPROPERTY(EditDefaultsOnly, Category = "MovingPointCost")
-		float MPCost;
+		int MPCost;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

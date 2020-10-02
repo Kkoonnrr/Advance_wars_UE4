@@ -55,18 +55,29 @@ public:
 	float TAxis;
 	bool Tsign;
 	bool Empty;
-	float MoveLimit = 3;
-	float MoveFLimit;
+	//float MoveLimit = 3;
+	int MoveFLimit;
 	float MoveTLimit;
 	int Counter;
+	int SpareMove;
+	int SCounter;
+	int Tap[10];
+	FVector SpareStart;
+	FVector SpareEnd;
 	FVector Actor;
 	FVector New;
+	FVector VLeft;
+	FVector VRight;
+	FVector VForward;
+	FVector VBackward;
 	UPROPERTY(EditDefaultsOnly, Category = "Spawning")
 		TSubclassOf<class AActor> ActorToSpawn;
 	UPROPERTY(EditDefaultsOnly, Category = "Spawning")
 		TSubclassOf<class AActor> MarkerToSpawn;
 	UPROPERTY(EditDefaultsOnly, Category = "Moving")
 		float forward;
+	UPROPERTY(EditDefaultsOnly, Category = "MovementPoints")
+		float MoveLimit;
 	//UPROPERTY(EditDefaultsOnly, Category = "Moving")
 		//float right;
 	int Mod(float one, float two);
@@ -74,5 +85,5 @@ public:
 		void TriggerEnter(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool FromSweep, const FHitResult& SweepResult);
 	//UFUNCTION()
 		//void TriggerExit(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-	
+	void searching();
 };

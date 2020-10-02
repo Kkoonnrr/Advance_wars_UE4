@@ -34,6 +34,10 @@ ATank::ATank()
 	Empty = false;
 	TAxis = 0;
 	Tsign = false;
+	VLeft = FVector(0.f, 500.f, 0.f);
+	VRight = FVector(0.f, -500.f, 0.f);
+	VForward = FVector(500.f, 0.f, 0.f);
+	VBackward = FVector(-500.f, 0.f, 0.f);
 	Actor = GetActorLocation();
 	New = GetActorLocation();
 	Box->OnComponentBeginOverlap.AddDynamic(this, &ATank::TriggerEnter);
@@ -134,6 +138,7 @@ void ATank::Tick(float DeltaTime)
 	}
 	else if (!Backward)
 	{
+
 		Empty = false;
 		Backward = true;
 		TTMoveB(TAxis, Tsign);
@@ -188,20 +193,62 @@ void ATank::Choice(bool Choose)
 			{
 				break;
 			}
-			DrawDebugLine(GetWorld(), StartTr + FVector(0.f, 0.f, 500.f), EndTr + FVector(0.f, 0.f, 500.f), FColor::Blue, false, 5.f);
 			for (int x = 0; x != HitResults.Num(); ++x)
 			{
+				//SpareMove = MoveLimit - MoveFLimit;
+				if (x == 0)
+				{
+					TArray<FHitResult> SHitResults;
+					SHitResults.Init(FHitResult(ForceInit), 10);
+					SCounter = 0;
+					SpareMove = MoveFLimit;
+					SpareStart = StartTr;
+					SpareEnd = EndTr;
+					do
+					{
+						//SpareStart = StartTr;
+						//SpareEnd = EndTr;
+						StartTr = SpareStart + SCounter * VLeft;
+						EndTr = SpareStart + (SCounter + 1) * VLeft;
+						GetWorld()->LineTraceMultiByChannel(SHitResults, StartTr, EndTr, ECC_Visibility, *TracePa, ResponseParams);
+						if (GetWorld()->LineTraceSingleByChannel(SHitResults[0], StartTr + VLeft, EndTr + VLeft, ECC_Visibility, *TracePa) == NULL)
+						{
+							break;
+						}
+						for (int y = 0; y != SHitResults.Num(); ++y)
+						{
+							DrawDebugLine(GetWorld(), StartTr + FVector(0.f, 0.f, 500.f), EndTr + FVector(0.f, 0.f, 500.f), FColor::Blue, false, 5.f);
+							if (y == 1)
+							{
+								//DrawDebugLine(GetWorld(), StartTr + FVector(0.f, 0.f, 500.f), EndTr + FVector(0.f, 0.f, 500.f), FColor::Blue, false, 5.f);
+								AStaticMeshActor* Field = Cast<AStaticMeshActor>(SHitResults[y].Actor.Get());
+								ATrawa* Trawaa = Cast<ATrawa>(SHitResults[y].Actor.Get());
+								//GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("%f"), Trawaa->MPCost));
+								if (Trawaa->MPCost <= MoveLimit - SpareMove)
+									Trawaa->ChangeMaterial();
+								SpareMove += Trawaa->MPCost;
+								Tap[SCounter] = Trawaa->MPCost;
+								SCounter++;
+							}
+						}
+					} while (SpareMove < MoveLimit);
+				}
+					StartTr = SpareStart;
+					EndTr = SpareEnd;
+					DrawDebugLine(GetWorld(), StartTr + FVector(0.f, 0.f, 500.f), EndTr + FVector(0.f, 0.f, 500.f), FColor::Blue, false, 5.f);
 				if (x == 1)
 				{
+					//DrawDebugLine(GetWorld(), StartTr + FVector(0.f, 0.f, 500.f), EndTr + FVector(0.f, 0.f, 500.f), FColor::Blue, false, 5.f);
 					AStaticMeshActor* Field = Cast<AStaticMeshActor>(HitResults[x].Actor.Get());
 					ATrawa* Trawaa = Cast<ATrawa>(HitResults[x].Actor.Get());
-					GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("%f"), Trawaa->MPCost));
+					//GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("%f"), Trawaa->MPCost));
+					if (Trawaa->MPCost <= MoveLimit - MoveFLimit)
+						Trawaa->ChangeMaterial();
 					MoveFLimit += Trawaa->MPCost;
+					Tap[Counter] = Trawaa->MPCost;
 					Counter++;
 				}
 			}
-		//	Counter++;
-		//MoveFLimit += 0.2;
 		} while (MoveFLimit < MoveLimit);
 		//Counter = 0;
 		/*FVector StartTr = GetActorLocation() - FVector(500.f* MoveLimit, 0.f, 500.f);
@@ -285,7 +332,7 @@ void ATank::TMove(float Axis, bool sign)
 			TraceP.AddIgnoredActor(this);
 			if (GetWorld()->LineTraceSingleByChannel(*HitR, StartT, EndT, ECC_Visibility, TraceP)==NULL)
 				Empty = true;
-			if (Empty == true)  MoveLimit -= 1;
+			if (Empty == true)  MoveLimit -= Tap[0];
 			TAxis = 1;
 			Tsign = false;
 			//FVector ActorLocation = GetActorLocation();
@@ -315,7 +362,7 @@ void ATank::TMove(float Axis, bool sign)
 			TraceP.AddIgnoredActor(this);
 			if (GetWorld()->LineTraceSingleByChannel(*HitR, StartT, EndT, ECC_Visibility, TraceP) == NULL)
 				Empty = true;
-			if (Empty == true)  MoveLimit -= 1;
+			if (Empty == true)  MoveLimit -= Tap[0];
 				TAxis = 1;
 				Tsign = true;
 				//FVector ActorLocation = GetActorLocation();
@@ -345,7 +392,7 @@ void ATank::TMove(float Axis, bool sign)
 			TraceP.AddIgnoredActor(this);
 			if (GetWorld()->LineTraceSingleByChannel(*HitR, StartT, EndT, ECC_Visibility, TraceP) == NULL)
 				Empty = true;
-			if (Empty == true)  MoveLimit -= 1;
+			if (Empty == true)  MoveLimit -= Tap[0];
 				TAxis = 2;
 				Tsign = false;
 				//FVector ActorLocation = GetActorLocation();
@@ -376,7 +423,7 @@ void ATank::TMove(float Axis, bool sign)
 			TraceP.AddIgnoredActor(this);
 			if (GetWorld()->LineTraceSingleByChannel(*HitR, StartT, EndT, ECC_Visibility, TraceP) == NULL)
 				Empty = true;
-			if (Empty == true)  MoveLimit -= 1;
+			if (Empty == true)  MoveLimit -= Tap[0];
 			TAxis = 2;
 			Tsign = true;
 			//FVector ActorLocation = GetActorLocation();
