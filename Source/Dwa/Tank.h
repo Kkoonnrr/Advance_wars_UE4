@@ -86,4 +86,5 @@ public:
 	//UFUNCTION()
 		//void TriggerExit(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 	void searching();
+
 };
