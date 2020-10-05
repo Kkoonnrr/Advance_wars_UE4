@@ -55,7 +55,7 @@ public:
 	float TAxis;
 	bool Tsign;
 	bool Empty;
-	//float MoveLimit = 3;
+	int field;
 	int MoveFLimit;
 	float MoveTLimit;
 	int Counter;
@@ -70,6 +70,7 @@ public:
 	FVector VRight;
 	FVector VForward;
 	FVector VBackward;
+	//ATrawa
 	UPROPERTY(EditDefaultsOnly, Category = "Spawning")
 		TSubclassOf<class AActor> ActorToSpawn;
 	UPROPERTY(EditDefaultsOnly, Category = "Spawning")
@@ -85,6 +86,8 @@ public:
 		void TriggerEnter(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool FromSweep, const FHitResult& SweepResult);
 	//UFUNCTION()
 		//void TriggerExit(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-	void searching();
+	void searching(float MoveL);
+	void Deleting(float MoveL);
+	void MinusMove(FVector Vector);
 
 };

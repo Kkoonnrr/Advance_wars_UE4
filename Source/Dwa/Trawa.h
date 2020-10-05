@@ -16,6 +16,8 @@ public:
 	ATrawa();
 	UFUNCTION()
 		void ChangeMaterial();
+	UFUNCTION()
+		void ResetMaterial();
 	UPROPERTY(EditDefaultsOnly, Category = "MovingPointCost")
 		int MPCost;
 protected:
@@ -27,7 +29,7 @@ protected:
 
 	UPROPERTY(EditAnyWhere)
 		class UMaterial* OnMove;
-	//UPROPERTY(EditAnyWhere)
-		//class UMaterial* OffMove;
+	UPROPERTY(EditAnyWhere)
+		class UMaterial* OffMove;
 
 };

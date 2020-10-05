@@ -15,11 +15,15 @@ ATrawa::ATrawa()
 void ATrawa::BeginPlay()
 {
 	Super::BeginPlay();
-	//SM_Block->SetMaterial(0, OffMove);
 }
 
 void ATrawa::ChangeMaterial()
 {
 	SM_Block->SetMaterial(0, OnMove);
+}
+
+void ATrawa::ResetMaterial()
+{
+	SM_Block->SetMaterial(0, OffMove);
 }
 
