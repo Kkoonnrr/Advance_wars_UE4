@@ -37,8 +37,8 @@ ATank::ATank()
 	Tsign = false;
 	VLeft = FVector(0.f, 500.f, 0.f);
 	VRight = FVector(0.f, -500.f, 0.f);
-	VForward = FVector(500.f, 0.f, 0.f);
-	VBackward = FVector(-500.f, 0.f, 0.f);
+	VForward = FVector(-500.f, 0.f, 0.f);
+	VBackward = FVector(500.f, 0.f, 0.f);
 	Actor = GetActorLocation();
 	New = GetActorLocation();
 	Box->OnComponentBeginOverlap.AddDynamic(this, &ATank::TriggerEnter);
@@ -152,6 +152,8 @@ void ATank::Tick(float DeltaTime)
 	}
 }
 
+
+
 void ATank::DamageTaken(float Damage)
 {
 	Health -= Damage;
@@ -218,7 +220,12 @@ void ATank::TriggerEnter(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrim
 }
 void ATank::searching(float MoveL)
 {
-	field = 0;
+	FindingBlocks(VForward, 1);
+	FindingBlocks(VBackward, 1);
+	FindingBlocks(VLeft, 1);
+	FindingBlocks(VRight, 1);
+}
+	/*field = 0;
 	TArray<FHitResult> HitResults;
 	HitResults.Init(FHitResult(ForceInit), 40);
 	MoveFLimit = 0;
@@ -241,7 +248,7 @@ void ATank::searching(float MoveL)
 			if (x == 0)
 			{
 				TArray<FHitResult> SHitResults;
-				SHitResults.Init(FHitResult(ForceInit), 10);
+				SHitResults.Init(FHitResult(ForceInit), 20);
 				SCounter = 0;
 				SpareMove = MoveFLimit;
 				SpareStart = StartTr;
@@ -263,7 +270,7 @@ void ATank::searching(float MoveL)
 							field++;
 							AStaticMeshActor* Field = Cast<AStaticMeshActor>(SHitResults[y].Actor.Get());
 							ATrawa* Trawaa = Cast<ATrawa>(SHitResults[y].Actor.Get());
-							if (Trawaa->MPCost <= MoveLimit - SpareMove)
+							if (Trawaa->MPCost <= MoveLimit - SpareMove && Trawaa->change == false)
 								Trawaa->ChangeMaterial();
 							SpareMove += Trawaa->MPCost;
 							Tap[SCounter] = Trawaa->MPCost;
@@ -292,7 +299,7 @@ void ATank::searching(float MoveL)
 							field++;
 							AStaticMeshActor* Field = Cast<AStaticMeshActor>(SHitResults[y].Actor.Get());
 							ATrawa* Trawaa = Cast<ATrawa>(SHitResults[y].Actor.Get());
-							if (Trawaa->MPCost <= MoveLimit - SpareMove)
+							if (Trawaa->MPCost <= MoveLimit - SpareMove && Trawaa->change == false)
 								Trawaa->ChangeMaterial();
 							SpareMove += Trawaa->MPCost;
 							Tap[SCounter] = Trawaa->MPCost;
@@ -309,7 +316,7 @@ void ATank::searching(float MoveL)
 				field++;
 				AStaticMeshActor* Field = Cast<AStaticMeshActor>(HitResults[x].Actor.Get());
 				ATrawa* Trawaa = Cast<ATrawa>(HitResults[x].Actor.Get());
-				if (Trawaa->MPCost <= MoveLimit - MoveFLimit)
+				if (Trawaa->MPCost <= MoveLimit - MoveFLimit && Trawaa->change == false)
 					Trawaa->ChangeMaterial();
 				MoveFLimit += Trawaa->MPCost;
 				Tap[Counter] = Trawaa->MPCost;
@@ -339,7 +346,7 @@ void ATank::searching(float MoveL)
 			if (x == 0)
 			{
 				TArray<FHitResult> SHitResults;
-				SHitResults.Init(FHitResult(ForceInit), 10);
+				SHitResults.Init(FHitResult(ForceInit), 20);
 				SCounter = 0;
 				SpareMove = MoveFLimit;
 				SpareStart = StartTr;
@@ -362,7 +369,7 @@ void ATank::searching(float MoveL)
 								field++;
 							AStaticMeshActor* Field = Cast<AStaticMeshActor>(SHitResults[y].Actor.Get());
 							ATrawa* Trawaa = Cast<ATrawa>(SHitResults[y].Actor.Get());
-							if (Trawaa->MPCost <= MoveLimit - SpareMove)
+							if (Trawaa->MPCost <= MoveLimit - SpareMove && Trawaa->change == false)
 								Trawaa->ChangeMaterial();
 							SpareMove += Trawaa->MPCost;
 							Tap[SCounter] = Trawaa->MPCost;
@@ -393,7 +400,7 @@ void ATank::searching(float MoveL)
 								field++;
 							AStaticMeshActor* Field = Cast<AStaticMeshActor>(SHitResults[y].Actor.Get());
 							ATrawa* Trawaa = Cast<ATrawa>(SHitResults[y].Actor.Get());
-							if (Trawaa->MPCost <= MoveLimit - SpareMove)
+							if (Trawaa->MPCost <= MoveLimit - SpareMove && Trawaa->change == false)
 								Trawaa->ChangeMaterial();
 							SpareMove += Trawaa->MPCost;
 							Tap[SCounter] = Trawaa->MPCost;
@@ -410,7 +417,7 @@ void ATank::searching(float MoveL)
 				field++;
 				AStaticMeshActor* Field = Cast<AStaticMeshActor>(HitResults[x].Actor.Get());
 				ATrawa* Trawaa = Cast<ATrawa>(HitResults[x].Actor.Get());
-				if (Trawaa->MPCost <= MoveLimit - MoveFLimit)
+				if (Trawaa->MPCost <= MoveLimit - MoveFLimit && Trawaa->change == false)
 					Trawaa->ChangeMaterial();
 				MoveFLimit += Trawaa->MPCost;
 				Tap[Counter] = Trawaa->MPCost;
@@ -418,11 +425,217 @@ void ATank::searching(float MoveL)
 			}
 		}
 	} while (MoveFLimit < MoveLimit);
+	//regergergrtgrt
+	MoveFLimit = 0;
+	Counter = 0;
+	do
+	{
+		FVector StartTr = GetActorLocation() - FVector(0.f, 0.f, 500.f) + Counter*VLeft;
+		FVector ForwardVe = VLeft;
+		FVector EndTr = (ForwardVe * 1 + StartTr);
+		FCollisionQueryParams* TracePa = new FCollisionQueryParams();
+		TracePa->bTraceComplex = false;
+		FCollisionResponseParams ResponseParams(ECollisionResponse::ECR_Overlap);
+		GetWorld()->LineTraceMultiByChannel(HitResults, StartTr, EndTr, ECC_Visibility, *TracePa, ResponseParams);
+		if (GetWorld()->LineTraceSingleByChannel(HitResults[0], StartTr + VLeft, EndTr + VLeft, ECC_Visibility, *TracePa) == NULL)
+		{
+			break;
+		}
+		for (int x = 0; x != HitResults.Num(); ++x)
+		{
+			if (x == 0)
+			{
+				TArray<FHitResult> SHitResults;
+				SHitResults.Init(FHitResult(ForceInit), 10);
+				SCounter = 0;
+				SpareMove = MoveFLimit;
+				SpareStart = StartTr;
+				SpareEnd = EndTr;
+				do
+				{
+					StartTr = SpareStart + SCounter * VForward;
+					EndTr = SpareStart + (SCounter + 1) * VForward;
+					GetWorld()->LineTraceMultiByChannel(SHitResults, StartTr, EndTr, ECC_Visibility, *TracePa, ResponseParams);
+					if (GetWorld()->LineTraceSingleByChannel(SHitResults[0], StartTr + VForward, EndTr + VForward, ECC_Visibility, *TracePa) == NULL)
+					{
+						break;
+					}
+					for (int y = 0; y != SHitResults.Num(); ++y)
+					{
+						//DrawDebugLine(GetWorld(), StartTr + FVector(0.f, 0.f, 500.f), EndTr + FVector(0.f, 0.f, 500.f), FColor::Blue, false, 5.f);
+						if (y == 1)
+						{
+							if (SCounter == 1)
+								field++;
+							AStaticMeshActor* Field = Cast<AStaticMeshActor>(SHitResults[y].Actor.Get());
+							ATrawa* Trawaa = Cast<ATrawa>(SHitResults[y].Actor.Get());
+							if (Trawaa->MPCost <= MoveLimit - SpareMove && Trawaa->change == false)
+								Trawaa->ChangeMaterial();
+							SpareMove += Trawaa->MPCost;
+							Tap[SCounter] = Trawaa->MPCost;
+							SCounter++;
+						}
+					}
+				} while (SpareMove < MoveLimit);
+				SCounter = 0;
+				SpareMove = MoveFLimit;
+				StartTr = SpareStart;
+				EndTr = SpareEnd;
+				do
+				{
+					StartTr = SpareStart + SCounter * VBackward;
+					EndTr = SpareStart + (SCounter + 1) * VBackward;
+					GetWorld()->LineTraceMultiByChannel(SHitResults, StartTr, EndTr, ECC_Visibility, *TracePa, ResponseParams);
+					if (GetWorld()->LineTraceSingleByChannel(SHitResults[0], StartTr + VBackward, EndTr + VBackward, ECC_Visibility, *TracePa) == NULL)
+					{
+						break;
+					}
+					for (int y = 0; y != SHitResults.Num(); ++y)
+					{
+
+						//DrawDebugLine(GetWorld(), StartTr + FVector(0.f, 0.f, 500.f), EndTr + FVector(0.f, 0.f, 500.f), FColor::Blue, false, 5.f);
+						if (y == 1)
+						{
+							if (SCounter == 1)
+								field++;
+							AStaticMeshActor* Field = Cast<AStaticMeshActor>(SHitResults[y].Actor.Get());
+							ATrawa* Trawaa = Cast<ATrawa>(SHitResults[y].Actor.Get());
+							if (Trawaa->MPCost <= MoveLimit - SpareMove && Trawaa->change == false)
+								Trawaa->ChangeMaterial();
+							SpareMove += Trawaa->MPCost;
+							Tap[SCounter] = Trawaa->MPCost;
+							SCounter++;
+						}
+					}
+				} while (SpareMove < MoveLimit);
+			}
+			StartTr = SpareStart;
+			EndTr = SpareEnd;
+			//DrawDebugLine(GetWorld(), StartTr + FVector(0.f, 0.f, 500.f), EndTr + FVector(0.f, 0.f, 500.f), FColor::Blue, false, 5.f);
+			if (x == 1)
+			{
+				field++;
+				AStaticMeshActor* Field = Cast<AStaticMeshActor>(HitResults[x].Actor.Get());
+				ATrawa* Trawaa = Cast<ATrawa>(HitResults[x].Actor.Get());
+				if (Trawaa->MPCost <= MoveLimit - MoveFLimit && Trawaa->change == false)
+					Trawaa->ChangeMaterial();
+				MoveFLimit += Trawaa->MPCost;
+				Tap[Counter] = Trawaa->MPCost;
+				Counter++;
+			}
+		}
+	} while (MoveFLimit < MoveLimit);
+
+	MoveFLimit = 0;
+	Counter = 0;
+	do
+	{
+		FVector StartTr = GetActorLocation() - FVector(0.f, 0.f, 500.f) + Counter * VRight;
+		FVector ForwardVe = VRight;
+		FVector EndTr = (ForwardVe * 1 + StartTr);
+		FCollisionQueryParams* TracePa = new FCollisionQueryParams();
+		TracePa->bTraceComplex = false;
+		FCollisionResponseParams ResponseParams(ECollisionResponse::ECR_Overlap);
+		GetWorld()->LineTraceMultiByChannel(HitResults, StartTr, EndTr, ECC_Visibility, *TracePa, ResponseParams);
+		if (GetWorld()->LineTraceSingleByChannel(HitResults[0], StartTr + VRight, EndTr + VRight, ECC_Visibility, *TracePa) == NULL)
+		{
+			break;
+		}
+		for (int x = 0; x != HitResults.Num(); ++x)
+		{
+			if (x == 0)
+			{
+				TArray<FHitResult> SHitResults;
+				SHitResults.Init(FHitResult(ForceInit), 10);
+				SCounter = 0;
+				SpareMove = MoveFLimit;
+				SpareStart = StartTr;
+				SpareEnd = EndTr;
+				do
+				{
+					StartTr = SpareStart + SCounter * VForward;
+					EndTr = SpareStart + (SCounter + 1) * VForward;
+					GetWorld()->LineTraceMultiByChannel(SHitResults, StartTr, EndTr, ECC_Visibility, *TracePa, ResponseParams);
+					if (GetWorld()->LineTraceSingleByChannel(SHitResults[0], StartTr + VForward, EndTr + VForward, ECC_Visibility, *TracePa) == NULL)
+					{
+						break;
+					}
+					for (int y = 0; y != SHitResults.Num(); ++y)
+					{
+						//DrawDebugLine(GetWorld(), StartTr + FVector(0.f, 0.f, 500.f), EndTr + FVector(0.f, 0.f, 500.f), FColor::Blue, false, 5.f);
+						if (y == 1)
+						{
+							if (SCounter == 1)
+								field++;
+							AStaticMeshActor* Field = Cast<AStaticMeshActor>(SHitResults[y].Actor.Get());
+							ATrawa* Trawaa = Cast<ATrawa>(SHitResults[y].Actor.Get());
+							if (Trawaa->MPCost <= MoveLimit - SpareMove && Trawaa->change == false)
+								Trawaa->ChangeMaterial();
+							SpareMove += Trawaa->MPCost;
+							Tap[SCounter] = Trawaa->MPCost;
+							SCounter++;
+						}
+					}
+				} while (SpareMove < MoveLimit);
+				SCounter = 0;
+				SpareMove = MoveFLimit;
+				StartTr = SpareStart;
+				EndTr = SpareEnd;
+				do
+				{
+					StartTr = SpareStart + SCounter * VBackward;
+					EndTr = SpareStart + (SCounter + 1) * VBackward;
+					GetWorld()->LineTraceMultiByChannel(SHitResults, StartTr, EndTr, ECC_Visibility, *TracePa, ResponseParams);
+					if (GetWorld()->LineTraceSingleByChannel(SHitResults[0], StartTr + VBackward, EndTr + VBackward, ECC_Visibility, *TracePa) == NULL)
+					{
+						break;
+					}
+					for (int y = 0; y != SHitResults.Num(); ++y)
+					{
+
+						//DrawDebugLine(GetWorld(), StartTr + FVector(0.f, 0.f, 500.f), EndTr + FVector(0.f, 0.f, 500.f), FColor::Blue, false, 5.f);
+						if (y == 1)
+						{
+							if (SCounter == 1)
+								field++;
+							AStaticMeshActor* Field = Cast<AStaticMeshActor>(SHitResults[y].Actor.Get());
+							ATrawa* Trawaa = Cast<ATrawa>(SHitResults[y].Actor.Get());
+							if (Trawaa->MPCost <= MoveLimit - SpareMove && Trawaa->change == false)
+								Trawaa->ChangeMaterial();
+							SpareMove += Trawaa->MPCost;
+							Tap[SCounter] = Trawaa->MPCost;
+							SCounter++;
+						}
+					}
+				} while (SpareMove < MoveLimit);
+			}
+			StartTr = SpareStart;
+			EndTr = SpareEnd;
+			//DrawDebugLine(GetWorld(), StartTr + FVector(0.f, 0.f, 500.f), EndTr + FVector(0.f, 0.f, 500.f), FColor::Blue, false, 5.f);
+			if (x == 1)
+			{
+				field++;
+				AStaticMeshActor* Field = Cast<AStaticMeshActor>(HitResults[x].Actor.Get());
+				ATrawa* Trawaa = Cast<ATrawa>(HitResults[x].Actor.Get());
+				if (Trawaa->MPCost <= MoveLimit - MoveFLimit && Trawaa->change == false)
+					Trawaa->ChangeMaterial();
+				MoveFLimit += Trawaa->MPCost;
+				Tap[Counter] = Trawaa->MPCost;
+				Counter++;
+			}
+		}
+	} while (MoveFLimit < MoveLimit);
+	//retwg5rg
 	GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Blue, FString::Printf(TEXT("%d"), field));
-}
+}*/
 void ATank::Deleting(float MoveL)
 {
-	TArray<FHitResult> HitResults;
+	FindingBlocks(VForward, 0);
+	FindingBlocks(VBackward, 0);
+	FindingBlocks(VLeft, 0);
+	FindingBlocks(VRight, 0);
+}
+	/*TArray<FHitResult> HitResults;
 	HitResults.Init(FHitResult(ForceInit), 40);
 	MoveFLimit = 0;
 	Counter = 0;
@@ -466,7 +679,7 @@ void ATank::Deleting(float MoveL)
 							//field++;
 							AStaticMeshActor* Field = Cast<AStaticMeshActor>(SHitResults[y].Actor.Get());
 							ATrawa* Trawaa = Cast<ATrawa>(SHitResults[y].Actor.Get());
-							if (Trawaa->MPCost <= MoveLimit - SpareMove)
+							if (Trawaa->MPCost <= MoveLimit - SpareMove && Trawaa->change == false)
 								Trawaa->ResetMaterial();
 							SpareMove += Trawaa->MPCost;
 							Tap[SCounter] = Trawaa->MPCost;
@@ -495,7 +708,7 @@ void ATank::Deleting(float MoveL)
 							//field++;
 							AStaticMeshActor* Field = Cast<AStaticMeshActor>(SHitResults[y].Actor.Get());
 							ATrawa* Trawaa = Cast<ATrawa>(SHitResults[y].Actor.Get());
-							if (Trawaa->MPCost <= MoveLimit - SpareMove)
+							if (Trawaa->MPCost <= MoveLimit - SpareMove && Trawaa->change == false)
 								Trawaa->ResetMaterial();
 							SpareMove += Trawaa->MPCost;
 							Tap[SCounter] = Trawaa->MPCost;
@@ -512,7 +725,7 @@ void ATank::Deleting(float MoveL)
 				//field++;
 				AStaticMeshActor* Field = Cast<AStaticMeshActor>(HitResults[x].Actor.Get());
 				ATrawa* Trawaa = Cast<ATrawa>(HitResults[x].Actor.Get());
-				if (Trawaa->MPCost <= MoveLimit - MoveFLimit)
+				if (Trawaa->MPCost <= MoveLimit - MoveFLimit && Trawaa->change == false)
 					Trawaa->ResetMaterial();
 				MoveFLimit += Trawaa->MPCost;
 				Tap[Counter] = Trawaa->MPCost;
@@ -565,7 +778,7 @@ void ATank::Deleting(float MoveL)
 								//field++;
 							AStaticMeshActor* Field = Cast<AStaticMeshActor>(SHitResults[y].Actor.Get());
 							ATrawa* Trawaa = Cast<ATrawa>(SHitResults[y].Actor.Get());
-							if (Trawaa->MPCost <= MoveLimit - SpareMove)
+							if (Trawaa->MPCost <= MoveLimit - SpareMove && Trawaa->change == false)
 								Trawaa->ResetMaterial();
 							SpareMove += Trawaa->MPCost;
 							Tap[SCounter] = Trawaa->MPCost;
@@ -596,7 +809,7 @@ void ATank::Deleting(float MoveL)
 								//field++;
 							AStaticMeshActor* Field = Cast<AStaticMeshActor>(SHitResults[y].Actor.Get());
 							ATrawa* Trawaa = Cast<ATrawa>(SHitResults[y].Actor.Get());
-							if (Trawaa->MPCost <= MoveLimit - SpareMove)
+							if (Trawaa->MPCost <= MoveLimit - SpareMove && Trawaa->change == false)
 								Trawaa->ResetMaterial();
 							SpareMove += Trawaa->MPCost;
 							Tap[SCounter] = Trawaa->MPCost;
@@ -613,7 +826,206 @@ void ATank::Deleting(float MoveL)
 				//field++;
 				AStaticMeshActor* Field = Cast<AStaticMeshActor>(HitResults[x].Actor.Get());
 				ATrawa* Trawaa = Cast<ATrawa>(HitResults[x].Actor.Get());
-				if (Trawaa->MPCost <= MoveLimit - MoveFLimit)
+				if (Trawaa->MPCost <= MoveLimit - MoveFLimit && Trawaa->change == false)
+					Trawaa->ResetMaterial();
+				MoveFLimit += Trawaa->MPCost;
+				Tap[Counter] = Trawaa->MPCost;
+				Counter++;
+			}
+		}
+	} while (MoveFLimit < MoveLimit);
+	MoveFLimit = 0;
+	Counter = 0;
+	do
+	{
+		FVector StartTr = GetActorLocation() - FVector(0.f, 0.f, 500.f) + Counter * VLeft;
+		FVector ForwardVe = VLeft;
+		FVector EndTr = (ForwardVe * 1 + StartTr);
+		FCollisionQueryParams* TracePa = new FCollisionQueryParams();
+		TracePa->bTraceComplex = false;
+		FCollisionResponseParams ResponseParams(ECollisionResponse::ECR_Overlap);
+		GetWorld()->LineTraceMultiByChannel(HitResults, StartTr, EndTr, ECC_Visibility, *TracePa, ResponseParams);
+		if (GetWorld()->LineTraceSingleByChannel(HitResults[0], StartTr + VLeft, EndTr + VLeft, ECC_Visibility, *TracePa) == NULL)
+		{
+			break;
+		}
+		for (int x = 0; x != HitResults.Num(); ++x)
+		{
+			if (x == 0)
+			{
+				TArray<FHitResult> SHitResults;
+				SHitResults.Init(FHitResult(ForceInit), 10);
+				SCounter = 0;
+				SpareMove = MoveFLimit;
+				SpareStart = StartTr;
+				SpareEnd = EndTr;
+				do
+				{
+					StartTr = SpareStart + SCounter * VForward;
+					EndTr = SpareStart + (SCounter + 1) * VForward;
+					GetWorld()->LineTraceMultiByChannel(SHitResults, StartTr, EndTr, ECC_Visibility, *TracePa, ResponseParams);
+					if (GetWorld()->LineTraceSingleByChannel(SHitResults[0], StartTr + VForward, EndTr + VForward, ECC_Visibility, *TracePa) == NULL)
+					{
+						break;
+					}
+					for (int y = 0; y != SHitResults.Num(); ++y)
+					{
+						//DrawDebugLine(GetWorld(), StartTr + FVector(0.f, 0.f, 500.f), EndTr + FVector(0.f, 0.f, 500.f), FColor::Blue, false, 5.f);
+						if (y == 1)
+						{
+							if (SCounter == 1)
+								field++;
+							AStaticMeshActor* Field = Cast<AStaticMeshActor>(SHitResults[y].Actor.Get());
+							ATrawa* Trawaa = Cast<ATrawa>(SHitResults[y].Actor.Get());
+							if (Trawaa->MPCost <= MoveLimit - SpareMove && Trawaa->change == true)
+								Trawaa->ResetMaterial();
+							SpareMove += Trawaa->MPCost;
+							Tap[SCounter] = Trawaa->MPCost;
+							SCounter++;
+						}
+					}
+				} while (SpareMove < MoveLimit);
+				SCounter = 0;
+				SpareMove = MoveFLimit;
+				StartTr = SpareStart;
+				EndTr = SpareEnd;
+				do
+				{
+					StartTr = SpareStart + SCounter * VBackward;
+					EndTr = SpareStart + (SCounter + 1) * VBackward;
+					GetWorld()->LineTraceMultiByChannel(SHitResults, StartTr, EndTr, ECC_Visibility, *TracePa, ResponseParams);
+					if (GetWorld()->LineTraceSingleByChannel(SHitResults[0], StartTr + VBackward, EndTr + VBackward, ECC_Visibility, *TracePa) == NULL)
+					{
+						break;
+					}
+					for (int y = 0; y != SHitResults.Num(); ++y)
+					{
+
+						//DrawDebugLine(GetWorld(), StartTr + FVector(0.f, 0.f, 500.f), EndTr + FVector(0.f, 0.f, 500.f), FColor::Blue, false, 5.f);
+						if (y == 1)
+						{
+							if (SCounter == 1)
+								field++;
+							AStaticMeshActor* Field = Cast<AStaticMeshActor>(SHitResults[y].Actor.Get());
+							ATrawa* Trawaa = Cast<ATrawa>(SHitResults[y].Actor.Get());
+							if (Trawaa->MPCost <= MoveLimit - SpareMove && Trawaa->change == true)
+								Trawaa->ResetMaterial();
+							SpareMove += Trawaa->MPCost;
+							Tap[SCounter] = Trawaa->MPCost;
+							SCounter++;
+						}
+					}
+				} while (SpareMove < MoveLimit);
+			}
+			StartTr = SpareStart;
+			EndTr = SpareEnd;
+			//DrawDebugLine(GetWorld(), StartTr + FVector(0.f, 0.f, 500.f), EndTr + FVector(0.f, 0.f, 500.f), FColor::Blue, false, 5.f);
+			if (x == 1)
+			{
+				field++;
+				AStaticMeshActor* Field = Cast<AStaticMeshActor>(HitResults[x].Actor.Get());
+				ATrawa* Trawaa = Cast<ATrawa>(HitResults[x].Actor.Get());
+				if (Trawaa->MPCost <= MoveLimit - MoveFLimit && Trawaa->change == true)
+					Trawaa->ResetMaterial();
+				MoveFLimit += Trawaa->MPCost;
+				Tap[Counter] = Trawaa->MPCost;
+				Counter++;
+			}
+		}
+	} while (MoveFLimit < MoveLimit);
+
+	MoveFLimit = 0;
+	Counter = 0;
+	do
+	{
+		FVector StartTr = GetActorLocation() - FVector(0.f, 0.f, 500.f) + Counter * VRight;
+		FVector ForwardVe = VRight;
+		FVector EndTr = (ForwardVe * 1 + StartTr);
+		FCollisionQueryParams* TracePa = new FCollisionQueryParams();
+		TracePa->bTraceComplex = false;
+		FCollisionResponseParams ResponseParams(ECollisionResponse::ECR_Overlap);
+		GetWorld()->LineTraceMultiByChannel(HitResults, StartTr, EndTr, ECC_Visibility, *TracePa, ResponseParams);
+		if (GetWorld()->LineTraceSingleByChannel(HitResults[0], StartTr + VRight, EndTr + VRight, ECC_Visibility, *TracePa) == NULL)
+		{
+			break;
+		}
+		for (int x = 0; x != HitResults.Num(); ++x)
+		{
+			if (x == 0)
+			{
+				TArray<FHitResult> SHitResults;
+				SHitResults.Init(FHitResult(ForceInit), 10);
+				SCounter = 0;
+				SpareMove = MoveFLimit;
+				SpareStart = StartTr;
+				SpareEnd = EndTr;
+				do
+				{
+					StartTr = SpareStart + SCounter * VForward;
+					EndTr = SpareStart + (SCounter + 1) * VForward;
+					GetWorld()->LineTraceMultiByChannel(SHitResults, StartTr, EndTr, ECC_Visibility, *TracePa, ResponseParams);
+					if (GetWorld()->LineTraceSingleByChannel(SHitResults[0], StartTr + VForward, EndTr + VForward, ECC_Visibility, *TracePa) == NULL)
+					{
+						break;
+					}
+					for (int y = 0; y != SHitResults.Num(); ++y)
+					{
+						//DrawDebugLine(GetWorld(), StartTr + FVector(0.f, 0.f, 500.f), EndTr + FVector(0.f, 0.f, 500.f), FColor::Blue, false, 5.f);
+						if (y == 1)
+						{
+							if (SCounter == 1)
+								field++;
+							AStaticMeshActor* Field = Cast<AStaticMeshActor>(SHitResults[y].Actor.Get());
+							ATrawa* Trawaa = Cast<ATrawa>(SHitResults[y].Actor.Get());
+							if (Trawaa->MPCost <= MoveLimit - SpareMove && Trawaa->change == true)
+								Trawaa->ResetMaterial();
+							SpareMove += Trawaa->MPCost;
+							Tap[SCounter] = Trawaa->MPCost;
+							SCounter++;
+						}
+					}
+				} while (SpareMove < MoveLimit);
+				SCounter = 0;
+				SpareMove = MoveFLimit;
+				StartTr = SpareStart;
+				EndTr = SpareEnd;
+				do
+				{
+					StartTr = SpareStart + SCounter * VBackward;
+					EndTr = SpareStart + (SCounter + 1) * VBackward;
+					GetWorld()->LineTraceMultiByChannel(SHitResults, StartTr, EndTr, ECC_Visibility, *TracePa, ResponseParams);
+					if (GetWorld()->LineTraceSingleByChannel(SHitResults[0], StartTr + VBackward, EndTr + VBackward, ECC_Visibility, *TracePa) == NULL)
+					{
+						break;
+					}
+					for (int y = 0; y != SHitResults.Num(); ++y)
+					{
+
+						//DrawDebugLine(GetWorld(), StartTr + FVector(0.f, 0.f, 500.f), EndTr + FVector(0.f, 0.f, 500.f), FColor::Blue, false, 5.f);
+						if (y == 1)
+						{
+							if (SCounter == 1)
+								field++;
+							AStaticMeshActor* Field = Cast<AStaticMeshActor>(SHitResults[y].Actor.Get());
+							ATrawa* Trawaa = Cast<ATrawa>(SHitResults[y].Actor.Get());
+							if (Trawaa->MPCost <= MoveLimit - SpareMove && Trawaa->change == true)
+								Trawaa->ResetMaterial();
+							SpareMove += Trawaa->MPCost;
+							Tap[SCounter] = Trawaa->MPCost;
+							SCounter++;
+						}
+					}
+				} while (SpareMove < MoveLimit);
+			}
+			StartTr = SpareStart;
+			EndTr = SpareEnd;
+			//DrawDebugLine(GetWorld(), StartTr + FVector(0.f, 0.f, 500.f), EndTr + FVector(0.f, 0.f, 500.f), FColor::Blue, false, 5.f);
+			if (x == 1)
+			{
+				field++;
+				AStaticMeshActor* Field = Cast<AStaticMeshActor>(HitResults[x].Actor.Get());
+				ATrawa* Trawaa = Cast<ATrawa>(HitResults[x].Actor.Get());
+				if (Trawaa->MPCost <= MoveLimit - MoveFLimit && Trawaa->change == true)
 					Trawaa->ResetMaterial();
 				MoveFLimit += Trawaa->MPCost;
 				Tap[Counter] = Trawaa->MPCost;
@@ -623,7 +1035,7 @@ void ATank::Deleting(float MoveL)
 	} while (MoveFLimit < MoveLimit);
 	GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Blue, FString::Printf(TEXT("%d"), field));
 }
-
+*/
 
 
 void ATank::Text()
@@ -816,7 +1228,6 @@ void ATank::TTMoveB(float Axis, bool sign)
 }
 void ATank::MinusMove(FVector Vector)
 {
-	//Deleting(MoveLimit);
 	FHitResult* HitR = new FHitResult();
 	FVector VSt = GetActorLocation() + Vector + FVector(0.f, 0.f, -500.f);
 	FVector VEn = GetActorLocation() + Vector * 2 + FVector(0.f, 0.f, -500.f);
@@ -825,4 +1236,119 @@ void ATank::MinusMove(FVector Vector)
 	ATrawa* Trawaa = Cast<ATrawa>(HitR->Actor.Get());
 	int Cost = Trawaa->MPCost;
 	MoveLimit = MoveLimit - Cost;
+}
+void ATank::FindingBlocks(FVector Vector, int SrD)
+{
+	if (Vector == VForward || Vector == VBackward)
+	{
+		Help1 = VLeft;
+		Help2 = VRight;
+	}
+	if (Vector == VLeft || Vector == VRight)
+	{
+		Help1 = VForward;
+		Help2 = VBackward;
+	}
+	field = 0;
+	TArray<FHitResult> HitResults;
+	HitResults.Init(FHitResult(ForceInit), 40);
+	MoveFLimit = 0;
+	Counter = 0;
+	do
+	{
+		FVector StartTr = GetActorLocation() - FVector(0.f, 0.f, 500.f) + Vector *Counter;
+		FVector ForwardVe = Vector;
+		FVector EndTr = (ForwardVe * 1 + StartTr);
+		FCollisionQueryParams* TracePa = new FCollisionQueryParams();
+		TracePa->bTraceComplex = false;
+		FCollisionResponseParams ResponseParams(ECollisionResponse::ECR_Overlap);
+		GetWorld()->LineTraceMultiByChannel(HitResults, StartTr, EndTr, ECC_Visibility, *TracePa, ResponseParams);
+		if (GetWorld()->LineTraceSingleByChannel(HitResults[0], StartTr + Vector, EndTr + Vector, ECC_Visibility, *TracePa) == NULL)
+		{
+			break;
+		}
+		for (int x = 0; x != HitResults.Num(); ++x)
+		{
+			if (x == 0)
+			{
+				TArray<FHitResult> SHitResults;
+				SHitResults.Init(FHitResult(ForceInit), 20);
+				SCounter = 0;
+				SpareMove = MoveFLimit;
+				SpareStart = StartTr;
+				SpareEnd = EndTr;
+				do
+				{
+					StartTr = SpareStart + SCounter * Help1;
+					EndTr = SpareStart + (SCounter + 1) * Help1;
+					GetWorld()->LineTraceMultiByChannel(SHitResults, StartTr, EndTr, ECC_Visibility, *TracePa, ResponseParams);
+					if (GetWorld()->LineTraceSingleByChannel(SHitResults[0], StartTr + Help1, EndTr + Help1, ECC_Visibility, *TracePa) == NULL)
+					{
+						break;
+					}
+					for (int y = 0; y != SHitResults.Num(); ++y)
+					{
+						if (y == 1)
+						{
+							field++;
+							AStaticMeshActor* Field = Cast<AStaticMeshActor>(SHitResults[y].Actor.Get());
+							ATrawa* Trawaa = Cast<ATrawa>(SHitResults[y].Actor.Get());
+							if (Trawaa->MPCost <= MoveLimit - SpareMove && Trawaa->change == false && SrD == 1)
+								Trawaa->ChangeMaterial();
+							else if(Trawaa->MPCost <= MoveLimit - SpareMove && Trawaa->change == true && SrD == 0)
+								Trawaa->ResetMaterial();
+							SpareMove += Trawaa->MPCost;
+							Tap[SCounter] = Trawaa->MPCost;
+							SCounter++;
+						}
+					}
+				} while (SpareMove < MoveLimit);
+				SCounter = 0;
+				SpareMove = MoveFLimit;
+				StartTr = SpareStart;
+				EndTr = SpareEnd;
+				do
+				{
+					StartTr = SpareStart + SCounter * Help2;
+					EndTr = SpareStart + (SCounter + 1) * Help2;
+					GetWorld()->LineTraceMultiByChannel(SHitResults, StartTr, EndTr, ECC_Visibility, *TracePa, ResponseParams);
+					if (GetWorld()->LineTraceSingleByChannel(SHitResults[0], StartTr + Help2, EndTr + Help2, ECC_Visibility, *TracePa) == NULL)
+					{
+						break;
+					}
+					for (int y = 0; y != SHitResults.Num(); ++y)
+					{
+						if (y == 1)
+						{
+							field++;
+							AStaticMeshActor* Field = Cast<AStaticMeshActor>(SHitResults[y].Actor.Get());
+							ATrawa* Trawaa = Cast<ATrawa>(SHitResults[y].Actor.Get());
+							if (Trawaa->MPCost <= MoveLimit - SpareMove && Trawaa->change == false && SrD == 1)
+								Trawaa->ChangeMaterial();
+							else if(Trawaa->MPCost <= MoveLimit - SpareMove && Trawaa->change == true && SrD == 0)
+								Trawaa->ResetMaterial();
+							SpareMove += Trawaa->MPCost;
+							Tap[SCounter] = Trawaa->MPCost;
+							SCounter++;
+						}
+					}
+				} while (SpareMove < MoveLimit);
+			}
+			StartTr = SpareStart;
+			EndTr = SpareEnd;
+			if (x == 1)
+			{
+				field++;
+				AStaticMeshActor* Field = Cast<AStaticMeshActor>(HitResults[x].Actor.Get());
+				ATrawa* Trawaa = Cast<ATrawa>(HitResults[x].Actor.Get());
+				if (Trawaa->MPCost <= MoveLimit - SpareMove && Trawaa->change == false && SrD == 1)
+					Trawaa->ChangeMaterial();
+				else if (Trawaa->MPCost <= MoveLimit - SpareMove && Trawaa->change == true && SrD == 0)
+					Trawaa->ResetMaterial();
+				MoveFLimit += Trawaa->MPCost;
+				Tap[Counter] = Trawaa->MPCost;
+				Counter++;
+			}
+		}
+	} while (MoveFLimit < MoveLimit);
 }

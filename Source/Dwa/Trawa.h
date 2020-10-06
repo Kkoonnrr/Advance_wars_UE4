@@ -20,6 +20,7 @@ public:
 		void ResetMaterial();
 	UPROPERTY(EditDefaultsOnly, Category = "MovingPointCost")
 		int MPCost;
+	bool change;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -31,5 +32,6 @@ protected:
 		class UMaterial* OnMove;
 	UPROPERTY(EditAnyWhere)
 		class UMaterial* OffMove;
+	//bool change;
 
 };

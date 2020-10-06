@@ -14,16 +14,19 @@ ATrawa::ATrawa()
 // Called when the game starts or when spawned
 void ATrawa::BeginPlay()
 {
+	change = false;
 	Super::BeginPlay();
 }
 
 void ATrawa::ChangeMaterial()
 {
 	SM_Block->SetMaterial(0, OnMove);
+	change = true;
 }
 
 void ATrawa::ResetMaterial()
 {
 	SM_Block->SetMaterial(0, OffMove);
+	change = false;
 }
 

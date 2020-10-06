@@ -24,7 +24,6 @@ private:
 	float Health;
 	UTextRenderComponent* HealthText;
 	void Text();
-
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -32,7 +31,9 @@ public:
 	AMarker* TestTarget;
 	UPROPERTY(EditAnywhere)
 		UShapeComponent* Box;
-
+	void FindingBlocks(FVector Vector, int SrD);
+	FVector Help1;
+	FVector Help2;
 	UPROPERTY(EditDefaultsOnly)
 		UStaticMeshComponent* Tank;
 	FRotator NewRotation;
